@@ -1,0 +1,65 @@
+1. Variant of interest:
+	I found the Circus variant of Breakout interesting since unlike in other versions, where the player moves a platform of some sort in order to
+	manipulate a single bouncing object's trajectory, the player moves an entire seesaw unit instead, affecting the trajectory of a second bouncing 
+	object when the first comes back down. In other versions, players can only sort of direct the movements of multiple bouncing objects if the number
+	of balls increases, but the movement of these additional balls isn't really fully under player control. If multiple objects bounce off each other,
+    that's arbitrary, not intentional. Instead, in this version, the trajectory of one bouncing object is directly tied to another, and the player
+    can effectively intentionally control both. I think that's fairly unique amongst all these variations and therefore interesting. The player isn't
+    trying to get some primary object to bounce in a certain way, but rather to get a pair of objects to interact effectively.
+
+2. Levels:
+	For the first level, I want to lay blocks out around in a line fashion. This should be easier for the player, since a line of blocks won't be 
+	hard to aim at. I want different types of blocks to be differently colored, and the layers should be arranged in color blocks, where the colors 
+	form a pattern overall. 
+	
+	For the second level, I want to add a few more block types, and arrange the blocks in more of a lattice pattern, so the ball's movements will be
+	harder to predict when it bounces off things, making the level harder. I also want to arrange the blocks more towards the bottom of the screen,
+	again increasing difficulty for the player. The paddle size will decrease as well.
+	
+	For the third level, I'm going to add some final block types, and arrange middle blocks in a random pattern. The game's three upper walls will
+	be lined in two perimeter layers this round: a safe layer of standard blocks, and an outside layer of black hole blocks, so that as the standard 
+	blocks get destroyed the game gets harder.
+
+3. Blocks:
+	- Standard
+		- Blocks that clear after one hit
+		- Scores +1
+	- Speed-increasing
+		- Blocks that increase the speed of your ball when you hit them
+		- Color of ball changes after hitting these blocks, speed change lasts until decreased by a speed-decreasing block
+		- Increments speed by a factor of maybe x 1.5, hitting multiple of these blocks means your speed increases by x 1.5 each time
+		- Scores +2
+	- Speed-decreasing
+		- Blocks that decrease the speed of the ball when you hit them
+		- Color of ball changes after hitting these blocks, speed change lasts until increased by a speed-increasing block
+		- Increments speed by a factor of maybe x 1.5, hitting multiple of these blocks means your speed increases by x 1.5 each time
+		- Scores +1
+	- Black hole
+		- Blocks/patches that if hit will destroy your ball, bringing you one lost ball closer to losing
+		- Disappear with ball when hit, so theoretically possible to "sacrifice" ball to get rid of block to ease future gameplay
+	- Creation
+		- Blocks that when hit disappear and launch an extra power-up ball at random speed/direction for certain time period
+	- Instant-clear
+		- Block that if hit will instantly clear the level, disappears after certain time period
+		
+4. Paddle:
+	- Will bounce ball at perpendicular of angle it came at
+	- Will increase length by magnitude of maybe 1.25 whenever next increment of ~10 points is scored (length will max out though)
+	- Will obliterate all blocks above it every increment of ~15 points scored
+
+5. Power-ups:
+	- Creation block that creates more balls
+	- Every ~30 points scored, ball will become "fireball" and destroy not only blocks it touches but also blocks touching it either
+	  by the side or the corner, lasts for a couple seconds
+	- Every ~40 points scored, block will appear that if hit, will instantly clear level
+
+6. Cheat keys:
+	- Holding down s key will slow down ball by certain magnitude until released
+	- Pressing c will clear the level
+
+7. Extra:
+	- Holding down a will accelerate ball speed by time, aka longer held down = faster ball goes, until released
+	- I would argue this feature is substantial both because it involves a somewhat different calculation than all previous features, and also because
+	  acceleration of this sort increases a sense of urgency in most games, changing the way the game feels/plays
+	
+	
