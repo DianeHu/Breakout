@@ -39,6 +39,8 @@ public class Game extends Application {
 	private ArrayList<Block> myBlocks = new ArrayList<>();
 	private Group Blocks;
 	private Group root = new Group();
+	private Stage s;
+	private int lvlCounter;
 
 	@Override
 	public void start(Stage s) {
@@ -54,7 +56,7 @@ public class Game extends Application {
 		animation.play();
 	}
 
-	private Scene setUpGame(int width, int height, Paint background) {
+	protected Scene setUpGame(int width, int height, Paint background) {
 		myScene = new Scene(root, width, height, background);
 		paddle = new Rectangle(width / 2 - 40, height - 30, 70, 15);
 		Image bouncerImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
@@ -80,6 +82,12 @@ public class Game extends Application {
 	}
 
 	public void step(double elapsedTime) {
+		bounce();
+		myBouncer.move(elapsedTime);
+		winLose();
+	}
+	
+	private void bounce() {
 		for (int i = 0; i < myBlocks.size(); i++) {
 			if (myBouncer.getView().getBoundsInParent().intersects(myBlocks.get(i).getView().getBoundsInParent())) {
 				root.getChildren().remove(myBlocks.get(i).getView());
@@ -87,7 +95,11 @@ public class Game extends Application {
 				myBlocks.remove(i);
 			}
 		}
-		
+		myBouncer.bouncePaddle(myBouncer, paddle);
+		myBouncer.bounceScreen(SIZE, SIZE);
+	}
+	
+	private void winLose() {
 		if (myBlocks.size() == 0) {
 			Text victory = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3,
 					"Congrats, you win!");
@@ -95,24 +107,45 @@ public class Game extends Application {
 			victory.setFont(font);
 			victory.setFill(Color.WHITE);
 			root.getChildren().add(victory);
+			myBouncer.keepMoving = 0;
+			/*if(lvlCounter < 3) {
+				Scene nextScene = setUpGame(SIZE, SIZE, BACKGROUND);
+				s.setScene(nextScene);
+				s.setTitle(TITLE);
+				s.show();
+
+				KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
+				Timeline animation = new Timeline();
+				animation.setCycleCount(Timeline.INDEFINITE);
+				animation.getKeyFrames().add(frame);
+				animation.play();
+				lvlCounter++;
+			}*/
 		}
-
-		myBouncer.bouncePaddle(myBouncer, paddle);
-		myBouncer.bounceScreen(SIZE, SIZE);
-
+		
 		if (myBouncer.getY() > myScene.getHeight()) {
 			Text defeat = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3, "I'm sorry, you lost!");
 			Font font = new Font(25);
 			defeat.setFont(font);
 			defeat.setFill(Color.WHITE);
 			root.getChildren().add(defeat);
+			myBouncer.keepMoving = 0;
+			/*if(lvlCounter < 3) {
+				Scene nextScene = setUpGame(SIZE, SIZE, BACKGROUND);
+				s.setScene(nextScene);
+				s.setTitle(TITLE);
+				s.show();
+
+				KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
+				Timeline animation = new Timeline();
+				animation.setCycleCount(Timeline.INDEFINITE);
+				animation.getKeyFrames().add(frame);
+				animation.play();
+				lvlCounter++;
+			}*/
 		}
-
-		myBouncer.move(elapsedTime);
-		//b.setX(b.getX() + b.myVelocity.getX() * elapsedTime);
-		//b.setY(b.getY() - b.myVelocity.getY() * elapsedTime);
 	}
-
+	
 	private void handleKeyInput(KeyCode code) {
 		if (paddle.getX() < 0) {
 			paddle.setX(SIZE - 75);
