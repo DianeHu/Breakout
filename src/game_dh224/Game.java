@@ -40,10 +40,11 @@ public class Game extends Application {
 	private Group Blocks;
 	private Group root = new Group();
 	private Stage s;
-	private int lvlCounter;
+	private int lvlCounter = 1;
 
 	@Override
 	public void start(Stage s) {
+		this.s = s;
 		Scene scene = setUpGame(SIZE, SIZE, BACKGROUND);
 		s.setScene(scene);
 		s.setTitle(TITLE);
@@ -57,6 +58,7 @@ public class Game extends Application {
 	}
 
 	protected Scene setUpGame(int width, int height, Paint background) {
+		root = new Group();
 		myScene = new Scene(root, width, height, background);
 		paddle = new Rectangle(width / 2 - 40, height - 30, 70, 15);
 		Image bouncerImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
@@ -108,19 +110,11 @@ public class Game extends Application {
 			victory.setFill(Color.WHITE);
 			root.getChildren().add(victory);
 			myBouncer.keepMoving = 0;
-			/*if(lvlCounter < 3) {
+			if(lvlCounter < 3) {
+				lvlCounter++;
 				Scene nextScene = setUpGame(SIZE, SIZE, BACKGROUND);
 				s.setScene(nextScene);
-				s.setTitle(TITLE);
-				s.show();
-
-				KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
-				Timeline animation = new Timeline();
-				animation.setCycleCount(Timeline.INDEFINITE);
-				animation.getKeyFrames().add(frame);
-				animation.play();
-				lvlCounter++;
-			}*/
+			}
 		}
 		
 		if (myBouncer.getY() > myScene.getHeight()) {
@@ -130,19 +124,11 @@ public class Game extends Application {
 			defeat.setFill(Color.WHITE);
 			root.getChildren().add(defeat);
 			myBouncer.keepMoving = 0;
-			/*if(lvlCounter < 3) {
+			if(lvlCounter < 3) {
+				lvlCounter++;
 				Scene nextScene = setUpGame(SIZE, SIZE, BACKGROUND);
 				s.setScene(nextScene);
-				s.setTitle(TITLE);
-				s.show();
-
-				KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
-				Timeline animation = new Timeline();
-				animation.setCycleCount(Timeline.INDEFINITE);
-				animation.getKeyFrames().add(frame);
-				animation.play();
-				lvlCounter++;
-			}*/
+			}
 		}
 	}
 	
