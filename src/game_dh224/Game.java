@@ -28,18 +28,17 @@ public class Game extends Application {
 	public static final int FRAMES_PER_SECOND = 60;
 	public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
 	public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
-	public static final int KEY_INPUT_SPEED = 5;
+	public static final int KEY_INPUT_SPEED = 40;
 	public static final double GROWTH_RATE = 1.1;
 	public static final int NUM_BLOCKS = 500;
-	public Group root;
 
 	private Scene myScene;
-	private Rectangle Block;
 	private Rectangle paddle;
-	private Bouncer b;
-	private List<Bouncer> myBouncers = new ArrayList<>();
-	private List<Block> myBlocks = new ArrayList<>();
+	private Bouncer myBouncer;
+	private ArrayList<Bouncer> myBouncers = new ArrayList<>();
+	private ArrayList<Block> myBlocks = new ArrayList<>();
 	private Group Blocks;
+	private Group root = new Group();
 
 	@Override
 	public void start(Stage s) {
@@ -56,71 +55,70 @@ public class Game extends Application {
 	}
 
 	private Scene setUpGame(int width, int height, Paint background) {
-		Group root = new Group();
 		myScene = new Scene(root, width, height, background);
-		paddle = new Rectangle(width / 2 - 40, height / 2 - 50, 70, 20);
+		paddle = new Rectangle(width / 2 - 40, height - 30, 70, 15);
 		Image bouncerImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
 		Image blockImage = new Image(getClass().getClassLoader().getResourceAsStream(BLOCK_IMAGE));
-		b = new Bouncer(bouncerImage, width, height);
+		myBouncer = new Bouncer(bouncerImage, width, height);
 
 		paddle.setFill(Color.CORNSILK);
 		Blocks = new Group();
 
 		root.getChildren().add(paddle);
 		root.getChildren().add(Blocks);
-		root.getChildren().add(b.getView());
+		root.getChildren().add(myBouncer.getView());
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 3; i++) {
 			Block currBlock = new Block(blockImage, width, height);
-			Blocks.getChildren().add(currBlock.getView());
+			currBlock.setLoc(75 * i, 50 * i);
 			myBlocks.add(currBlock);
+			root.getChildren().add(currBlock.getView());
 		}
 
 		myScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
 		return myScene;
 	}
 
-	private void step(double elapsedTime) {
-		collide();
-		b.move(elapsedTime);
-
-	}
-
-	public void collide() {
-		for (int i = 0; i < Blocks.getChildren().size(); i++) {
-			if (b.getView().getBoundsInParent().intersects(Blocks.getChildren().get(i).getBoundsInParent())) {
-				Blocks.getChildren().remove(i);
-
-				if (Blocks.getChildren().size() == 0) {
-					Text victory = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3,
-							"Congrats, you win!");
-					Font font = new Font(50);
-					victory.setFont(font);
-					victory.setFill(Color.WHITE);
-					root.getChildren().add(victory);
-				}
+	public void step(double elapsedTime) {
+		for (int i = 0; i < myBlocks.size(); i++) {
+			if (myBouncer.getView().getBoundsInParent().intersects(myBlocks.get(i).getView().getBoundsInParent())) {
+				root.getChildren().remove(myBlocks.get(i).getView());
+				myBouncer.bounceBlock(myBouncer, myBlocks.get(i));
+				myBlocks.remove(i);
 			}
 		}
-
-		b.bouncePaddle(b, paddle);
-		b.bounceScreen(SIZE, SIZE);
-
-		for (Block block : myBlocks) {
-			b.bounceBlock(b, block);
+		
+		if (myBlocks.size() == 0) {
+			Text victory = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3,
+					"Congrats, you win!");
+			Font font = new Font(25);
+			victory.setFont(font);
+			victory.setFill(Color.WHITE);
+			root.getChildren().add(victory);
 		}
 
-		if (b.getY() > myScene.getHeight()) {
+		myBouncer.bouncePaddle(myBouncer, paddle);
+		myBouncer.bounceScreen(SIZE, SIZE);
+
+		if (myBouncer.getY() > myScene.getHeight()) {
 			Text defeat = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3, "I'm sorry, you lost!");
-			Font font = new Font(50);
+			Font font = new Font(25);
 			defeat.setFont(font);
 			defeat.setFill(Color.WHITE);
 			root.getChildren().add(defeat);
 		}
 
+		myBouncer.move(elapsedTime);
+		//b.setX(b.getX() + b.myVelocity.getX() * elapsedTime);
+		//b.setY(b.getY() - b.myVelocity.getY() * elapsedTime);
 	}
 
 	private void handleKeyInput(KeyCode code) {
-		if (code == KeyCode.RIGHT) {
+		if (paddle.getX() < 0) {
+			paddle.setX(SIZE - 75);
+		} else if (paddle.getX() > SIZE) {
+			paddle.setX(0);
+		} else if (code == KeyCode.RIGHT) {
 			paddle.setX(paddle.getX() + KEY_INPUT_SPEED);
 		} else if (code == KeyCode.LEFT) {
 			paddle.setX(paddle.getX() - KEY_INPUT_SPEED);
