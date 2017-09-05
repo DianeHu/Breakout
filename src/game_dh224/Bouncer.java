@@ -13,8 +13,10 @@ public class Bouncer {
 	private double ySpeed;
 	private double xDirection;
 	private double yDirection;
+	public int keepMoving;
 	
 	public Bouncer (Image image, int screenWidth, int screenHeight) {
+		keepMoving = 1;
 		myView = new ImageView(image);
 		myView.setFitWidth(BOUNCER_SIZE);
 		myView.setFitHeight(BOUNCER_SIZE);
@@ -27,8 +29,8 @@ public class Bouncer {
 	}
 	
 	public void move(double elapsedTime) {
-		myView.setX(myView.getX() + xDirection * xSpeed * elapsedTime);
-		myView.setY(myView.getY() + yDirection * ySpeed * elapsedTime);
+		myView.setX(myView.getX() + keepMoving * xDirection * xSpeed * elapsedTime);
+		myView.setY(myView.getY() + keepMoving * yDirection * ySpeed * elapsedTime);
 	}
 	
 	public void bounceScreen (double screenWidth, double screenHeight) {
