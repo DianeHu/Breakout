@@ -38,7 +38,7 @@
 		- Blocks/patches that if hit will destroy your ball, bringing you one lost ball closer to losing
 		- Disappear with ball when hit, so theoretically possible to "sacrifice" ball to get rid of block to ease future gameplay
 	- Creation
-		- Blocks that when hit disappear and launch an extra power-up ball at random speed/direction for certain time period
+		- Blocks that when hit disappear and launch an extra power-up ball at random speed/direction until lost
 	- Instant-clear
 		- Block that if hit will instantly clear the level, disappears after certain time period
 		
