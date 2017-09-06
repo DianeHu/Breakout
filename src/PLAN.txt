@@ -45,7 +45,8 @@
 4. Paddle:
 	- Will bounce ball at perpendicular of angle it came at
 	- Will increase length by magnitude of maybe 1.25 whenever next increment of ~10 points is scored (length will max out though)
-	- Will obliterate all blocks above it every increment of ~15 points scored
+	- Will have ball stay on it until launched at beginning of every level, launches ball at angle of mouse click
+	- Warps from one side of screen to other
 
 5. Power-ups:
 	- Creation block that creates more balls
