@@ -7,5 +7,17 @@ public class speedPlusBlock extends Block{
 	public speedPlusBlock(Image image, int screenWidth, int screenHeight) {
 		super(image, screenWidth, screenHeight);
 	}
+	
+	@Override
+	public int getVal() {
+		return 2;
+	}
+	
+	@Override
+	public void bounceBlock (Bouncer myBouncer) {
+		if(myBouncer.getView().getBoundsInParent().intersects(this.getView().getBoundsInParent())) {
+			myBouncer.yDirection *= -1.5;
+		}
+	}
 }
 

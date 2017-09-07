@@ -25,6 +25,16 @@ public class Block {
 		return myView;
 	}
 	
+	public int getVal() {
+		return 1;
+	}
+	
+	public void bounceBlock (Bouncer myBouncer) {
+		if(myBouncer.getView().getBoundsInParent().intersects(myView.getBoundsInParent())) {
+			myBouncer.yDirection *= -1;
+		}
+	}
+	
 	public class creationBlock extends Block{
 		
 		public creationBlock(Image image, int screenWidth, int screenHeight) {
@@ -38,6 +48,7 @@ public class Block {
 			super(image, screenWidth, screenHeight);
 		}
 	}
+
 }
 
 

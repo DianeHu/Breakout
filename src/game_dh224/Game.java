@@ -1,7 +1,10 @@
 package game_dh224;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -34,18 +37,20 @@ public class Game extends Application {
 	public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
 	public static final int KEY_INPUT_SPEED = 40;
 	public static final double GROWTH_RATE = 1.1;
-	public static Group root = new Group();
-	public Scene initialScreen = new Scene(root, SIZE, SIZE, Color.AZURE);
+	//public Scene initialScreen = new Scene(root, SIZE, SIZE, Color.AZURE);
 	
 	private Label pCountLabel = new Label();
 	private Label lvlNumLabel = new Label();
 	private Label livesCounter = new Label();
 	private int pointCount = 0;
+	private Group root = new Group();
 	private Scene myScene;
 	private Rectangle paddle;
 	private Bouncer myBouncer;
 	private ArrayList<Bouncer> myBouncers = new ArrayList<>();
+	private ListIterator<Block> temp = null;
 	private ArrayList<Block> myBlocks = new ArrayList<>();
+	private ArrayList<Boolean> blockChecks = new ArrayList<>();
 	private ArrayList<speedPlusBlock> mySPBlocks = new ArrayList<>();
 	private ArrayList<blackHoleBlock> myBHBlocks = new ArrayList<>();
 	private Stage s;
@@ -61,9 +66,9 @@ public class Game extends Application {
 	@Override
 	public void start(Stage s) {
 		this.s = s;
-		if(needsSplash) {
+		/*if(needsSplash) {
 			splashScreen(s);
-		}
+		}*/
 		Scene scene = setUpGame(SIZE, SIZE, BACKGROUND);
 		s.setScene(scene);
 		s.setTitle(TITLE);
@@ -76,10 +81,10 @@ public class Game extends Application {
 		animation.play();
 	}
 	
-	public void splashScreen(Stage s) {
+	/*public void splashScreen(Stage s) {
 		this.s = s;
 		s.setScene(initialScreen);
-	}
+	}*/
 
 	protected Scene setUpGame(int width, int height, Paint background) {
 		initNumLabel();
@@ -100,10 +105,19 @@ public class Game extends Application {
 		root.getChildren().add(lvlNumLabel);
 		root.getChildren().add(livesCounter);
 		
-		for (int i = 0; i < 5; i++) {
-			StandardBlock currBlock = new StandardBlock(standardBlockImage, width, height);
+		for (int i = 0; i < 3; i++) {
+			Block currBlock = new StandardBlock(standardBlockImage, width, height);
 			currBlock.setLoc(75 * i, 50 * i);
 			myBlocks.add(currBlock);
+			blockChecks.add(i, true);
+			root.getChildren().add(currBlock.getView());
+		}
+		
+		for (int i = 3; i < 5; i++) {
+			Block currBlock = new speedPlusBlock(speedPlusBlockImage, width, height);
+			currBlock.setLoc(75 * i, 50 * i);
+			myBlocks.add(currBlock);
+			blockChecks.add(i, true);
 			root.getChildren().add(currBlock.getView());
 		}
 		
@@ -156,6 +170,7 @@ public class Game extends Application {
 
 	public void step(double elapsedTime) {
 		myBouncer.moveWithPaddle(myBouncer, paddle);
+		temp = myBlocks.listIterator();
 		bounce();
 		myBouncer.move(elapsedTime);
 		winLose();
@@ -163,32 +178,46 @@ public class Game extends Application {
 	
 	private void bounce() {
 		
-		for(int i = 0; i < myBlocks.size(); i++) {
-			if (myBouncer.getView().getBoundsInParent().intersects(myBlocks.get(i).getView().getBoundsInParent())) {
+		while(temp.hasNext()) {
+			Block block = temp.next();
+			if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
+				block.bounceBlock(myBouncer);
+				root.getChildren().remove(block.getView());
+				pointCount += block.getVal();
+				pCountLabel.setText("Points: " + Integer.toString(pointCount));
+				temp.remove();
+			}
+		}
+		
+		/*for(int i = 0; i < myBlocks.size(); i++) {
+			if (myBouncer.getView().getBoundsInParent().intersects(myBlocks.get(i).getView().getBoundsInParent()) && blockChecks.get(i)) {
+				myBlocks.get(i).bounceBlock(myBouncer);
+				blockChecks.set(i, false);
 				root.getChildren().remove(myBlocks.get(i).getView());
 				if(myBlocks.get(i) instanceof StandardBlock) {
+					System.out.println("Collide");
 					myBouncer.bounceStandardBlock(myBouncer, (StandardBlock) myBlocks.get(i)); 
-					myBlocks.remove(i);
-					pointCount++;
+					pointCount += 1;
 					pCountLabel.setText("Points: " + Integer.toString(pointCount));
 				}
 				else if(myBlocks.get(i) instanceof speedPlusBlock) {
+					System.out.println("Collide");
 					myBouncer.bounceSpeedPlusBlock(myBouncer, (speedPlusBlock) myBlocks.get(i)); 
-					myBlocks.remove(i);
-					pointCount += 2;
+					pointCount += 1;
 					pCountLabel.setText("Points: " + Integer.toString(pointCount));
 				}
 				else if(myBlocks.get(i) instanceof speedMinusBlock) {
+					System.out.println("Collide");
 					myBouncer.bounceSpeedMinusBlock(myBouncer, (speedMinusBlock) myBlocks.get(i)); 
-					myBlocks.remove(i);
-					pointCount += 2;
+					pointCount += 1;
 					pCountLabel.setText("Points: " + Integer.toString(pointCount));
 				}
+				pointCount += myBlocks.get(i).getVal();
+				pCountLabel.setText("Points: " + Integer.toString(pointCount));
 			}
-			if(pointCount % 3 == 1) {
+			/*if(pointCount % 3 == 1) {
 				paddle.setWidth(paddle.getWidth() + 10);
-			}
-		}
+			}*/
 		
 		myBouncer.bouncePaddle(myBouncer, paddle);
 		myBouncer.bounceScreen(SIZE, SIZE);

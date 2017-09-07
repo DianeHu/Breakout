@@ -20,8 +20,8 @@ public class Bouncer {
 	private ImageView myView;
 	private double xSpeed;
 	private double ySpeed;
-	private double xDirection;
-	private double yDirection;
+	public double xDirection;
+	public double yDirection;
 	public int keepMoving;
 	public boolean stayOnPaddle;
 	
@@ -45,8 +45,6 @@ public class Bouncer {
 	}
 	
 	public void launch(double x, double y) {
-		//xSpeed = getRandomInRange(getRandomInRange(BOUNCER_MIN_SPEED_LOWER, BOUNCER_MIN_SPEED_UPPER), getRandomInRange(BOUNCER_MAX_SPEED_LOWER, BOUNCER_MAX_SPEED_UPPER));
-		//ySpeed = getRandomInRange(getRandomInRange(BOUNCER_MIN_SPEED_LOWER, BOUNCER_MIN_SPEED_UPPER), getRandomInRange(BOUNCER_MAX_SPEED_LOWER, BOUNCER_MAX_SPEED_UPPER));
 		xSpeed = x;
 		ySpeed = y;
 	}
@@ -83,31 +81,35 @@ public class Bouncer {
 	public void bounceBlock (Bouncer myBouncer, Block block) {
 		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
 			yDirection *= -1;
+			System.out.println("bounced");
 		}
 	}
 	
 	public void bounceStandardBlock (Bouncer myBouncer, StandardBlock block) {
 		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
 			yDirection *= -1;
+			System.out.println("bounced");
 		}
 	}
 	
 	public void bounceSpeedMinusBlock (Bouncer myBouncer, speedMinusBlock block) {
 		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
 			yDirection *= -.5;
+			System.out.println("bounced");
 		}
 	}
 	
 	public void bounceBlackHoleBlock (Bouncer myBouncer, blackHoleBlock block) {
 		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-			Game.root.getChildren().remove(myBouncer);
-			Game.root.getChildren().remove(block);
+			//Game.root.getChildren().remove(myBouncer);
+			//Game.root.getChildren().remove(block);
 		}
 	}
 	
 	public void bounceSpeedPlusBlock (Bouncer myBouncer, speedPlusBlock block) {
 		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-			yDirection *= -1.5;
+			yDirection *= -1.3;
+			System.out.println("bounced");
 		}
 	}
 	
