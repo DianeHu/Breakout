@@ -53,7 +53,7 @@ public class Game extends Application {
 	private ArrayList<Boolean> blockChecks = new ArrayList<>();
 	private ArrayList<speedPlusBlock> mySPBlocks = new ArrayList<>();
 	private ArrayList<blackHoleBlock> myBHBlocks = new ArrayList<>();
-	private Stage s;
+	private Stage s = null;
 	private int lvlCounter = 1;
 	private int numLives = 3;
 	private Image standardBlockImage;
@@ -62,13 +62,10 @@ public class Game extends Application {
 	private Image bouncerImage;
 	private boolean needsSplash = true;
 
-
 	@Override
 	public void start(Stage s) {
 		this.s = s;
-		/*if(needsSplash) {
-			splashScreen(s);
-		}*/
+		root.getChildren().clear();
 		Scene scene = setUpGame(SIZE, SIZE, BACKGROUND);
 		s.setScene(scene);
 		s.setTitle(TITLE);
@@ -80,11 +77,6 @@ public class Game extends Application {
 		animation.getKeyFrames().add(frame);
 		animation.play();
 	}
-	
-	/*public void splashScreen(Stage s) {
-		this.s = s;
-		s.setScene(initialScreen);
-	}*/
 
 	protected Scene setUpGame(int width, int height, Paint background) {
 		initNumLabel();
@@ -93,6 +85,7 @@ public class Game extends Application {
 		initLivesCounter();
 		
 		root = new Group();
+		root.getChildren().clear();
 		myScene = new Scene(root, width, height, background);
 		
 		paddle = new Rectangle(width / 2 - 40, height - 20, 70, 15);
@@ -106,10 +99,9 @@ public class Game extends Application {
 		root.getChildren().add(livesCounter);
 		
 		for (int i = 0; i < 3; i++) {
-			Block currBlock = new StandardBlock(standardBlockImage, width, height);
-			currBlock.setLoc(75 * i, 50 * i);
+			Block currBlock = new Block(standardBlockImage, width, height);
+			currBlock.setLoc(75*i, 50*i);
 			myBlocks.add(currBlock);
-			blockChecks.add(i, true);
 			root.getChildren().add(currBlock.getView());
 		}
 		
@@ -117,7 +109,6 @@ public class Game extends Application {
 			Block currBlock = new speedPlusBlock(speedPlusBlockImage, width, height);
 			currBlock.setLoc(75 * i, 50 * i);
 			myBlocks.add(currBlock);
-			blockChecks.add(i, true);
 			root.getChildren().add(currBlock.getView());
 		}
 		
@@ -182,6 +173,7 @@ public class Game extends Application {
 			Block block = temp.next();
 			if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
 				block.bounceBlock(myBouncer);
+				root.getChildren().remove(block);
 				root.getChildren().remove(block.getView());
 				pointCount += block.getVal();
 				pCountLabel.setText("Points: " + Integer.toString(pointCount));
@@ -189,48 +181,22 @@ public class Game extends Application {
 			}
 		}
 		
-		/*for(int i = 0; i < myBlocks.size(); i++) {
-			if (myBouncer.getView().getBoundsInParent().intersects(myBlocks.get(i).getView().getBoundsInParent()) && blockChecks.get(i)) {
-				myBlocks.get(i).bounceBlock(myBouncer);
-				blockChecks.set(i, false);
-				root.getChildren().remove(myBlocks.get(i).getView());
-				if(myBlocks.get(i) instanceof StandardBlock) {
-					System.out.println("Collide");
-					myBouncer.bounceStandardBlock(myBouncer, (StandardBlock) myBlocks.get(i)); 
-					pointCount += 1;
-					pCountLabel.setText("Points: " + Integer.toString(pointCount));
-				}
-				else if(myBlocks.get(i) instanceof speedPlusBlock) {
-					System.out.println("Collide");
-					myBouncer.bounceSpeedPlusBlock(myBouncer, (speedPlusBlock) myBlocks.get(i)); 
-					pointCount += 1;
-					pCountLabel.setText("Points: " + Integer.toString(pointCount));
-				}
-				else if(myBlocks.get(i) instanceof speedMinusBlock) {
-					System.out.println("Collide");
-					myBouncer.bounceSpeedMinusBlock(myBouncer, (speedMinusBlock) myBlocks.get(i)); 
-					pointCount += 1;
-					pCountLabel.setText("Points: " + Integer.toString(pointCount));
-				}
-				pointCount += myBlocks.get(i).getVal();
-				pCountLabel.setText("Points: " + Integer.toString(pointCount));
-			}
-			/*if(pointCount % 3 == 1) {
-				paddle.setWidth(paddle.getWidth() + 10);
-			}*/
-		
 		myBouncer.bouncePaddle(myBouncer, paddle);
 		myBouncer.bounceScreen(SIZE, SIZE);
 	}
 	
 	private void winLose() {
-		if (myBlocks.size() == 0) {
+		if (myBlocks.size() == 0 && lvlCounter == 3) {
 			Text victory = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3,
 					"Congrats, you win!");
 			Font font = new Font(25);
 			victory.setFont(font);
 			victory.setFill(Color.WHITE);
 			root.getChildren().add(victory);
+			myBouncer.keepMoving = 0;
+		}
+		
+		else if (myBlocks.size() == 0 && lvlCounter != 3) {
 			myBouncer.keepMoving = 0;
 			lvlCounter++;
 			nextLevel();
@@ -240,7 +206,7 @@ public class Game extends Application {
 			restartBouncer();
 		}*/
 		
-		if (myBouncer.getY() > myScene.getHeight() - paddle.getHeight()) {
+		else if (myBouncer.getY() > myScene.getHeight() - paddle.getHeight() && myBlocks.size() != 0) {
 			Text defeat = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3, "I'm sorry, you lost!");
 			Font font = new Font(25);
 			defeat.setFont(font);
@@ -263,6 +229,7 @@ public class Game extends Application {
 	
 	private void nextLevel() {
 		if(lvlCounter <= 3) {
+			root.getChildren().clear();
 			Scene nextScene = setUpGame(SIZE, SIZE, BACKGROUND);
 			lvlNumLabel.setText("Level: " + Integer.toString(lvlCounter));
 			pointCount = 0;
@@ -284,11 +251,7 @@ public class Game extends Application {
 	}
 	
 	private void handleMouseInput (double x, double y) {
-		if(x > 0 && x < SIZE && y > 0 && y < SIZE && needsSplash) {
-			needsSplash = false;
-			start(s);
-		}
-        if (x > 0 && x < SIZE && y > 0 && y < SIZE && !needsSplash) {
+        if (x > 0 && x < SIZE && y > 0 && y < SIZE) {
         	myBouncer.stayOnPaddle = false;
             myBouncer.launch(x - myBouncer.getX(), y - myBouncer.getY());
         }

@@ -78,41 +78,6 @@ public class Bouncer {
 		}
 	}
 	
-	public void bounceBlock (Bouncer myBouncer, Block block) {
-		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-			yDirection *= -1;
-			System.out.println("bounced");
-		}
-	}
-	
-	public void bounceStandardBlock (Bouncer myBouncer, StandardBlock block) {
-		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-			yDirection *= -1;
-			System.out.println("bounced");
-		}
-	}
-	
-	public void bounceSpeedMinusBlock (Bouncer myBouncer, speedMinusBlock block) {
-		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-			yDirection *= -.5;
-			System.out.println("bounced");
-		}
-	}
-	
-	public void bounceBlackHoleBlock (Bouncer myBouncer, blackHoleBlock block) {
-		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-			//Game.root.getChildren().remove(myBouncer);
-			//Game.root.getChildren().remove(block);
-		}
-	}
-	
-	public void bounceSpeedPlusBlock (Bouncer myBouncer, speedPlusBlock block) {
-		if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-			yDirection *= -1.3;
-			System.out.println("bounced");
-		}
-	}
-	
 	public Node getView() {
 		return myView;
 	}
