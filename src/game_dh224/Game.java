@@ -50,9 +50,6 @@ public class Game extends Application {
 	private ArrayList<Bouncer> myBouncers = new ArrayList<>();
 	private ListIterator<Block> temp = null;
 	private ArrayList<Block> myBlocks = new ArrayList<>();
-	private ArrayList<Boolean> blockChecks = new ArrayList<>();
-	private ArrayList<speedPlusBlock> mySPBlocks = new ArrayList<>();
-	private ArrayList<blackHoleBlock> myBHBlocks = new ArrayList<>();
 	private Stage s = null;
 	private int lvlCounter = 1;
 	private int numLives = 3;
@@ -253,7 +250,7 @@ public class Game extends Application {
 	private void handleMouseInput (double x, double y) {
         if (x > 0 && x < SIZE && y > 0 && y < SIZE) {
         	myBouncer.stayOnPaddle = false;
-            myBouncer.launch(x - myBouncer.getX(), y - myBouncer.getY());
+            myBouncer.launch(x, y);
         }
     }
 

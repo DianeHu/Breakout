@@ -15,8 +15,9 @@ public class Bouncer {
 	public static final int BOUNCER_MIN_SPEED_UPPER = -150;
 	public static final int BOUNCER_MAX_SPEED_LOWER = 150;
 	public static final int BOUNCER_MAX_SPEED_UPPER = 200;
+	public static final double BOUNCER_SPEED = 300;
+	public static final double SCREEN_SIZE = 400;
 	
-	private Random dice = new Random();
 	private ImageView myView;
 	private double xSpeed;
 	private double ySpeed;
@@ -45,8 +46,14 @@ public class Bouncer {
 	}
 	
 	public void launch(double x, double y) {
-		xSpeed = x;
-		ySpeed = y;
+		double xDist = x - myView.getX();
+		double yDist = y - myView.getY();
+		double constant = (Math.pow(BOUNCER_SPEED, 2) / (Math.pow(xDist, 2) + Math.pow(yDist, 2)));
+		xSpeed = Math.pow(constant * Math.pow(xDist, 2), 0.5);
+		ySpeed = Math.pow(constant * Math.pow(yDist, 2), 0.5);
+		if(x < SCREEN_SIZE / 2) {
+			xSpeed *= -1;
+		}
 	}
 	
 	public void bounceScreen (double screenWidth, double screenHeight) {
@@ -88,9 +95,5 @@ public class Bouncer {
 	
 	public double getY() {
 		return myView.getY();
-	}
-	
-	private int getRandomInRange(int min, int max) {
-		return min + dice.nextInt(max - min) + 1;
 	}
 }
