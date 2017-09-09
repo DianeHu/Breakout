@@ -11,16 +11,15 @@ import javafx.scene.shape.Rectangle;
 
 public class Bouncer {
 	public static final int BOUNCER_SIZE = 15;
-	public static final int BOUNCER_MIN_SPEED_LOWER = -200;
-	public static final int BOUNCER_MIN_SPEED_UPPER = -150;
-	public static final int BOUNCER_MAX_SPEED_LOWER = 150;
-	public static final int BOUNCER_MAX_SPEED_UPPER = 200;
+	public static final int BOUNCER_MIN_SPEED = -200;
+	public static final int BOUNCER_MAX_SPEED = 200;
 	public static final double BOUNCER_SPEED = 300;
-	public static final double SCREEN_SIZE = 400;
+	public static final int SCREEN_SIZE = 400;
 	
 	private ImageView myView;
 	private double xSpeed;
 	private double ySpeed;
+	private Random dice = new Random();
 	public double xDirection;
 	public double yDirection;
 	public int keepMoving;
@@ -38,6 +37,16 @@ public class Bouncer {
 		ySpeed = 0;
 		xDirection = 1;
 		yDirection = 1;
+	}
+	
+	public Bouncer creationBouncer(double blockX, double blockY) {
+		Bouncer newBouncer = new Bouncer(myView.getImage(), SCREEN_SIZE, SCREEN_SIZE);
+		newBouncer.stayOnPaddle = false;
+		newBouncer.setX(blockX);
+		newBouncer.setY(blockY);
+		newBouncer.xSpeed = getRandomInRange(BOUNCER_MIN_SPEED, BOUNCER_MAX_SPEED);
+		newBouncer.ySpeed = getRandomInRange(BOUNCER_MIN_SPEED, BOUNCER_MAX_SPEED);
+		return newBouncer;
 	}
 	
 	public void move(double elapsedTime) {
@@ -68,6 +77,7 @@ public class Bouncer {
 	public void moveWithPaddle(Bouncer myBouncer, Rectangle paddle) {
 		if(stayOnPaddle) {
 			myBouncer.setX(paddle.getX() + 25);
+			myBouncer.setY(paddle.getY() - 20);
 		}
 	}
 	
@@ -85,6 +95,12 @@ public class Bouncer {
 		}
 	}
 	
+	public void dropBouncer () {
+		this.xSpeed = 0;
+		this.ySpeed = 250;
+		this.yDirection = 1;
+	}
+	
 	public Node getView() {
 		return myView;
 	}
@@ -95,5 +111,9 @@ public class Bouncer {
 	
 	public double getY() {
 		return myView.getY();
+	}
+	
+	private int getRandomInRange(int min, int max) {
+		return min + dice.nextInt(max - min) + 1;
 	}
 }

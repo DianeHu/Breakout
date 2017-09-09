@@ -29,6 +29,14 @@ public class Block {
 		return 1;
 	}
 	
+	public double getX() {
+		return myView.getX();
+	}
+	
+	public double getY() {
+		return myView.getY();
+	}
+	
 	public void bounceBlock (Bouncer myBouncer) {
 		if(myBouncer.getView().getBoundsInParent().intersects(myView.getBoundsInParent())) {
 			myBouncer.yDirection *= -1;
