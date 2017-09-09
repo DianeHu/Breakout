@@ -11,11 +11,14 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -32,6 +35,8 @@ public class Game extends Application {
 	public static final String SPEED_MINUS_BLOCK = "Brick3.gif";
 	public static final String BLACK_HOLE_BLOCK = "Brick4.gif";
 	public static final String CREATION_BLOCK = "Brick5.gif";
+	public static final String INSTANT_CLEAR_BLOCK = "Brick6.gif";
+	public static final String PADDLE_IMAGE = "paddle.gif";
 	public static final int SIZE = 400;
 	public static final Paint BACKGROUND = Color.DARKSLATEGREY;
 	public static final int FRAMES_PER_SECOND = 60;
@@ -39,6 +44,8 @@ public class Game extends Application {
 	public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
 	public static final int KEY_INPUT_SPEED = 40;
 	public static final double GROWTH_RATE = 1.1;
+	public static final int BLOCK_WIDTH = 30;
+	public static final int BLOCK_HEIGHT = 20;
 	//public Scene initialScreen = new Scene(root, SIZE, SIZE, Color.AZURE);
 	
 	private Label pCountLabel = new Label();
@@ -52,20 +59,32 @@ public class Game extends Application {
 	private ArrayList<Bouncer> myBouncers = new ArrayList<>();
 	private ListIterator<Block> myBlocksIterator = null;
 	private ArrayList<Block> myBlocks = new ArrayList<>();
-	private ArrayList<Bouncer> toAddBouncers = new ArrayList<>();
+	private ListIterator<Bouncer> myBouncersIterator = null;
+	private ArrayList<Block> blackHoleBlocks = new ArrayList<>();
+	private ArrayList<Bouncer> toBeAdded = new ArrayList<>();
 	private Stage s = null;
 	private int lvlCounter = 1;
-	private int numLives = 3;
+	private int numLives = 10;
 	private Image standardBlockImage;
 	private Image speedPlusBlockImage;
 	private Image speedMinusBlockImage;
 	private Image creationBlockImage;
 	private Image blackHoleBlockImage;
+	private Image paddleImage;
 	private Image bouncerImage;
+	private Image instantClearBlockImage;
 	private boolean needsSplash = true;
-
+	private boolean sHeld = false;
+	private int numNewBouncers = 0;
+	private StackPane stack;
+	private Rectangle backDrop;
+	private Text splashWelcome;
+	private Text splashExplanation;
+	private int offset = 5;
+	
 	@Override
 	public void start(Stage s) {
+		
 		this.s = s;
 		root.getChildren().clear();
 		Scene scene = setUpGame(SIZE, SIZE, BACKGROUND);
@@ -85,58 +104,92 @@ public class Game extends Application {
 		initImages();
 		initPointCounter();
 		initLivesCounter();
+
+		//stack = loseScreen(stack, SIZE, SIZE);
 		
 		root = new Group();
 		root.getChildren().clear();
 		myScene = new Scene(root, width, height, background);
 		
-		paddle = new Rectangle(width / 2 - 40, height - 20, 70, 15);
-		paddle.setFill(Color.CORNSILK);
+		paddle = new Rectangle(width / 2 - 40, height - 20, 70, 10);
+		paddle.setFill(new ImagePattern(paddleImage));
 		myBouncer = new Bouncer(bouncerImage, width, height);
 		myBouncers.add(myBouncer);
-		
+		splashScreen();
 		root.getChildren().add(paddle);
+		//root.getChildren().add(stack);
 		root.getChildren().add(myBouncer.getView());
 		root.getChildren().add(pCountLabel);
 		root.getChildren().add(lvlNumLabel);
 		root.getChildren().add(livesCounter);
 		
-		for (int i = 0; i < 2; i++) {
-			Block currBlock = new Block(standardBlockImage, width, height);
-			currBlock.setLoc(75*i, 50*i);
-			myBlocks.add(currBlock);
-			root.getChildren().add(currBlock.getView());
-		}
+		level1(SIZE, BLOCK_WIDTH, BLOCK_HEIGHT);
 		
-		for (int i = 2; i < 3; i++) {
-			Block currBlock = new creationBlock(creationBlockImage, width, height);
-			currBlock.setLoc(75*i, 50*i);
-			myBlocks.add(currBlock);
-			root.getChildren().add(currBlock.getView());
+		if(lvlCounter == 1) {
+			root.getChildren().add(backDrop);
+			root.getChildren().add(splashWelcome);
+			root.getChildren().add(splashExplanation);
 		}
-		
-		for (int i = 3; i < 4; i++) {
-			Block currBlock = new speedPlusBlock(speedPlusBlockImage, width, height);
-			currBlock.setLoc(75 * i, 50 * i);
-			myBlocks.add(currBlock);
-			root.getChildren().add(currBlock.getView());
-		}
-		
-		for (int i = 4; i < 5; i++) {
-			Block currBlock = new blackHoleBlock(blackHoleBlockImage, width, height);
-			currBlock.setLoc(75 * i, 50 * i);
-			myBlocks.add(currBlock);
-			root.getChildren().add(currBlock.getView());
-		}
-		
 		myScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
 		myScene.setOnMouseClicked(e -> handleMouseInput(e.getX(), e.getY()));
 		return myScene;
+	}
+
+	private void level1(int width, int blockWidth, int blockHeight) {
+		/*for (int i = 1; i < (width/blockWidth - 2); i++) {
+			Block currBlock = new Block(standardBlockImage);
+			currBlock.setLoc(blockWidth * i + offset * i, 50);
+			myBlocks.add(currBlock);
+			root.getChildren().add(currBlock.getView());
+		}
+		
+		for (int i = 1; i < (width/blockWidth - 2); i++) {
+			Block currBlock = new Block(standardBlockImage);
+			currBlock.setLoc(50, blockHeight * i + offset * i);
+			myBlocks.add(currBlock);
+			root.getChildren().add(currBlock.getView());
+		}*/
+		
+		for(int i = 1; i < (width/blockWidth - 2); i++) {
+			for(int j = 1; j < (width/blockHeight - 10); j++) {
+				Block currBlock = new Block(standardBlockImage);
+				currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
+				myBlocks.add(currBlock);
+				root.getChildren().add(currBlock.getView());
+			}
+		}
+		
 	}
 	
 	public void addBouncer(Bouncer bounce) {
 		root.getChildren().add(bounce.getView());
 		myBouncers.add(bounce);
+	}
+	
+	public void splashScreen() {
+		backDrop = new Rectangle(0, 0, SIZE, SIZE);
+		backDrop.setFill(Color.BLUEVIOLET);
+		splashWelcome = new Text(SIZE/ 2 - 150, SIZE/ 3, "Welcome to Breakout! Click anywhere to start.");
+		splashExplanation = new Text(SIZE/2 - 150, 2*SIZE / 3, "Your goal is to destroy all blocks. However, beware! Hitting certain "
+				+ "blocks may have unforseen consequences! Good luck!");
+		splashExplanation.setWrappingWidth(300);
+		Font font = new Font(15);
+		splashWelcome.setFont(font);
+		splashWelcome.setFill(Color.WHITE);
+		splashExplanation.setFont(font);
+		splashExplanation.setFill(Color.WHITE);
+	}
+	
+	public StackPane loseScreen(StackPane stack, int screenWidth, int screenHeight) {
+		Rectangle lose = new Rectangle(30, 30, screenWidth, screenHeight);
+		lose.setFill(Color.BLUEVIOLET);
+		Text defeat = new Text(screenWidth / 3 - 100, screenHeight / 3, "I'm sorry, you lost!");
+		Font font = new Font(25);
+		defeat.setFont(font);
+		defeat.setFill(Color.WHITE);
+		stack.getChildren().addAll(lose, defeat);
+		System.out.println(stack.getChildren());
+		return stack;
 	}
 	
 	private void initImages() {
@@ -146,6 +199,8 @@ public class Game extends Application {
 		speedMinusBlockImage = new Image(getClass().getClassLoader().getResourceAsStream(SPEED_MINUS_BLOCK));
 		blackHoleBlockImage = new Image(getClass().getClassLoader().getResourceAsStream(BLACK_HOLE_BLOCK));
 		creationBlockImage = new Image(getClass().getClassLoader().getResourceAsStream(CREATION_BLOCK));
+		instantClearBlockImage = new Image(getClass().getClassLoader().getResourceAsStream(INSTANT_CLEAR_BLOCK));
+		paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
 	}
 	
 	private void initNumLabel() {
@@ -172,6 +227,7 @@ public class Game extends Application {
 	private void step(double elapsedTime) {
 		myBouncer.moveWithPaddle(myBouncer, paddle);
 		myBlocksIterator = myBlocks.listIterator();
+		myBouncersIterator = myBouncers.listIterator();
 		bounce();
 		for(Bouncer b : myBouncers) {
 			b.move(elapsedTime);
@@ -183,28 +239,67 @@ public class Game extends Application {
 		
 		while(myBlocksIterator.hasNext()) {
 			Block block = myBlocksIterator.next();
-			if(myBouncer.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-				if(block instanceof blackHoleBlock) {
-					restartBouncer(myBouncer);
-				}
-				if(block instanceof creationBlock) {
-					addBouncer(myBouncer.creationBouncer(block.getX(), block.getY()));
-				}
-				block.bounceBlock(myBouncer);
-				//root.getChildren().remove(block);
-				root.getChildren().remove(block.getView());
-				pointCount += block.getVal();
-				pCountLabel.setText("Points: " + Integer.toString(pointCount));
-				myBlocksIterator.remove();
-			}
+			collide(myBouncer, block);
 		}
 		
-		myBouncer.bouncePaddle(myBouncer, paddle);
-		myBouncer.bounceScreen(SIZE, SIZE);
+		/*while(myBlocksIterator.hasNext()) {
+			Block block = myBlocksIterator.next();
+			while(myBouncersIterator.hasNext()) {
+				Bouncer b = myBouncersIterator.next();
+				if(b.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
+					if(block instanceof blackHoleBlock) {
+						restartBouncer(b);
+						blackHoleBlocks.remove(block);
+					}
+					if(block instanceof creationBlock) {
+						Bouncer newBounce = myBouncer.creationBouncer(block.getX(), block.getY());
+						addBouncer(newBounce);
+						myBouncersIterator.add(b);
+					}
+					block.bounceBlock(myBouncer);
+					//root.getChildren().remove(block);
+					root.getChildren().remove(block.getView());
+					pointCount += block.getVal();
+					pCountLabel.setText("Points: " + Integer.toString(pointCount));
+					myBlocksIterator.remove();
+				}
+			}
+		}*/
+		
+		for(Bouncer b : myBouncers) {
+			b.bouncePaddle(b, paddle);
+			b.bounceScreen(SIZE, SIZE);
+		}
+	}
+
+	private void collide(Bouncer b, Block block) {
+		if(b.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
+			if(block instanceof blackHoleBlock) {
+				restartBouncer(myBouncer);
+				blackHoleBlocks.remove(block);
+			}
+			else if(block instanceof creationBlock) {
+				Bouncer newBounce = myBouncer.creationBouncer(block.getX(), block.getY());
+				addBouncer(newBounce);
+			}
+			if(block instanceof instantClearBlock) {
+				myBlocksIterator.remove();
+				nextLevel();
+			}
+			block.bounceBlock(myBouncer);
+			//root.getChildren().remove(block);
+			root.getChildren().remove(block.getView());
+			pointCount += block.getVal();
+			pCountLabel.setText("Points: " + Integer.toString(pointCount));
+			myBlocksIterator.remove();
+		}
 	}
 	
 	private void winLose() {
-		if (myBlocks.size() == 0) {
+		ArrayList<Block> needToWin = new ArrayList<>();
+		needToWin.addAll(myBlocks);
+		needToWin.removeAll(blackHoleBlocks);
+		if (needToWin.size() == 0) {
 			if(lvlCounter == 3) {
 				Text victory = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3,
 						"Congrats, you win!");
@@ -215,15 +310,14 @@ public class Game extends Application {
 				myBouncer.keepMoving = 0;
 			} else {
 				myBouncer.keepMoving = 0;
-				lvlCounter++;
 				nextLevel();
 			}
 		}
 		
 		if(myBouncer.getY() > myScene.getHeight()) {
-			if(myBlocks.size() != 0 && numLives != 0) {
+			if(needToWin.size() != 0 && numLives != 0) {
 				restartBouncer(myBouncer);
-			} else if(numLives == 0 || lvlCounter == 3){
+			} else if(numLives == 0){
 				Text defeat = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3, "I'm sorry, you lost!");
 				Font font = new Font(25);
 				defeat.setFont(font);
@@ -246,7 +340,9 @@ public class Game extends Application {
 	
 	private void nextLevel() {
 		myBlocks.clear();
+		blackHoleBlocks.clear();
 		numLives = 3;
+		lvlCounter++;
 		if(lvlCounter <= 3) {
 			Scene nextScene = setUpGame(SIZE, SIZE, BACKGROUND);
 			lvlNumLabel.setText("Level: " + Integer.toString(lvlCounter));
@@ -266,12 +362,29 @@ public class Game extends Application {
 		} else if (code == KeyCode.LEFT) {
 			paddle.setX(paddle.getX() - KEY_INPUT_SPEED);
 		}
+		
+		if(code == KeyCode.C) {
+			nextLevel();
+		} else if (code == KeyCode.S) {
+			sHeld = true;
+			if(sHeld) {
+				myBouncer.slow(myBouncer);
+			}
+		} else if (code == KeyCode.A) {
+			myBouncer.accelerate(myBouncer);
+		}
+		sHeld = false;
 	}
 	
 	private void handleMouseInput (double x, double y) {
         if (x > 0 && x < SIZE && y > 0 && y < SIZE) {
+        	if(lvlCounter == 1) {
+        		root.getChildren().removeAll(backDrop, splashWelcome, splashExplanation);
+        	}
         	myBouncer.stayOnPaddle = false;
-            myBouncer.launch(x, y);
+            myBouncer.launch(x - myBouncer.getX(), y - myBouncer.getY());
+            System.out.println(x + " " + (x - myBouncer.getX()) + " " + y + " " + (y - myBouncer.getY()));
+            System.out.println(myBouncer.getX() + " " + myBouncer.getY());
         }
     }
 

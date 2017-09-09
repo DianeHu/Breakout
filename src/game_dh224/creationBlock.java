@@ -4,8 +4,8 @@ import javafx.scene.image.Image;
 
 public class creationBlock extends Block{
 
-	public creationBlock(Image image, int screenWidth, int screenHeight) {
-		super(image, screenWidth, screenHeight);
+	public creationBlock(Image image) {
+		super(image);
 	}
 	
 	@Override

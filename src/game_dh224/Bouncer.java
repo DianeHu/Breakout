@@ -22,6 +22,8 @@ public class Bouncer {
 	private Random dice = new Random();
 	public double xDirection;
 	public double yDirection;
+	private double previousXDir;
+	private double previousYDir;
 	public int keepMoving;
 	public boolean stayOnPaddle;
 	
@@ -31,7 +33,7 @@ public class Bouncer {
 		myView = new ImageView(image);
 		myView.setFitWidth(BOUNCER_SIZE);
 		myView.setFitHeight(BOUNCER_SIZE);
-		myView.setX(screenHeight / 2);
+		myView.setX(screenWidth / 2 - 40);
 		myView.setY(screenHeight - 37);
 		xSpeed = 0;
 		ySpeed = 0;
@@ -54,13 +56,33 @@ public class Bouncer {
 		myView.setY(myView.getY() + keepMoving * yDirection * ySpeed * elapsedTime);
 	}
 	
+	public void slow(Bouncer b) {
+		double constant = (Math.pow(100, 2) / (Math.pow(b.xSpeed, 2) + Math.pow(b.ySpeed, 2)));
+		previousXDir = b.xSpeed;
+		previousYDir = b.ySpeed;
+		b.xSpeed /= 2;
+		b.ySpeed /= 2;
+		//b.xSpeed = (b.xSpeed < 0) ? (-1 * Math.pow(constant * Math.pow(b.xSpeed, 2), 0.5)) : Math.pow(constant * Math.pow(b.xSpeed, 2), 0.5);
+		//b.ySpeed = (b.ySpeed < 0) ? (-1 * Math.pow(constant * Math.pow(b.ySpeed, 2), 0.5)) : Math.pow(constant * Math.pow(b.ySpeed, 2), 0.5);
+	}
+	
+	public void accelerate(Bouncer b) {
+		b.xSpeed *= 1.05;
+		b.ySpeed *= 1.05;
+	}
+	
+	public void returnSpeed(Bouncer b) {
+		b.xSpeed = previousXDir;
+		b.ySpeed = previousYDir;
+	}
+	
 	public void launch(double x, double y) {
 		double xDist = x - myView.getX();
 		double yDist = y - myView.getY();
 		double constant = (Math.pow(BOUNCER_SPEED, 2) / (Math.pow(xDist, 2) + Math.pow(yDist, 2)));
 		xSpeed = Math.pow(constant * Math.pow(xDist, 2), 0.5);
 		ySpeed = Math.pow(constant * Math.pow(yDist, 2), 0.5);
-		if(x < SCREEN_SIZE / 2) {
+		if(xDist < SCREEN_SIZE / 2) {
 			xSpeed *= -1;
 		}
 	}
