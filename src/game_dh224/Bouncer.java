@@ -85,8 +85,6 @@ public class Bouncer {
 		double constant = (Math.pow(BOUNCER_SPEED, 2) / (Math.pow(xDist, 2) + Math.pow(yDist, 2)));
 		xSpeed = Math.pow(constant * Math.pow(xDist, 2), 0.5);
 		ySpeed = Math.pow(constant * Math.pow(yDist, 2), 0.5);
-		
-		System.out.println("My xDirection is" + xDirection + "My yDirection is" + yDirection);
 	}
 	
 	public void bounceScreen (double screenWidth, double screenHeight) {

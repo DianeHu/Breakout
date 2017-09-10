@@ -201,7 +201,7 @@ public class Game extends Application {
 		backDrop.setFill(Color.BLUEVIOLET);
 		splashWelcome = new Text(SIZE / 2 - 150, SIZE / 3, "Welcome to Breakout! Click anywhere to start.");
 		splashExplanation = new Text(SIZE / 2 - 150, 2 * SIZE / 3,
-				"Your goal is to destroy all blocks. However, beware! Hitting certain "
+				"Your goal is to destroy all blocks--however, beware! Hitting certain "
 						+ "blocks may have unforseen consequences! Good luck!");
 		splashExplanation.setWrappingWidth(300);
 		Font font = new Font(15);
@@ -376,10 +376,10 @@ public class Game extends Application {
 		paddle.setY(SIZE - 20);
 		myBouncer.moveWithPaddle(myBouncer, paddle);
 		livesCounter.setText("Lives: " + Integer.toString(numLives));
-		System.out.println(myBouncer.xDirection);
 	}
 
 	private void nextLevel() {
+		myBouncer.keepMoving = 0;
 		myBlocks.clear();
 		blackHoleBlocks.clear();
 		numLives = 3;
@@ -405,6 +405,7 @@ public class Game extends Application {
 		}
 
 		if (code == KeyCode.C) {
+			myBouncer.keepMoving = 0;
 			if (lvlCounter < 3) {
 				nextLevel();
 			}
@@ -426,7 +427,6 @@ public class Game extends Application {
 			}
 			myBouncer.stayOnPaddle = false;
 			myBouncer.launch(x - myBouncer.getX(), y - myBouncer.getY());
-			System.out.println(x + " " + (x - myBouncer.getX()) + " " + y + " " + (y - myBouncer.getY()));
 		}
 	}
 
