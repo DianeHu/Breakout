@@ -18,9 +18,7 @@ public class Levels extends Game{
 		for (int i = 1; i < (width / blockWidth - 2); i++) {
 			for (int j = 1; j < (width / blockHeight - 15); j++) {
 				Block currBlock = new Block(image);
-				currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-				myBlocks.add(currBlock);
-				root.getChildren().add(currBlock.getView());
+				setBlock(myBlocks, currBlock, root, blockWidth, blockHeight, i, j, offset);
 			}
 		}
 	}
@@ -31,19 +29,13 @@ public class Levels extends Game{
 			for (int j = 1; j < (width / blockHeight - 10); j++) {
 				if(i%2 != 0 && j%2 != 0) {
 					Block currBlock = new Block(myImages.get(0));
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
+					setBlock(myBlocks, currBlock, root, blockWidth, blockHeight, i, j, offset);
 				} else if (i%2 == 0 && j%4 == 0) {
 					Block currBlock = new speedPlusBlock(myImages.get(1));
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
+					setBlock(myBlocks, currBlock, root, blockWidth, blockHeight, i, j, offset);
 				} else if (i%2 == 0 && j%2 == 0) {
 					Block currBlock = new speedMinusBlock(myImages.get(2));
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
+					setBlock(myBlocks, currBlock, root, blockWidth, blockHeight, i, j, offset);
 				}
 			}
 		}
@@ -57,33 +49,29 @@ public class Levels extends Game{
 			for (int j = 0; j < (width / blockHeight - 8); j++) {
 				if(((i == 0 || i == width/blockWidth - 3) && j%2 != 0) || (j == 0 && i%2 != 0)) {
 					Block currBlock = new blackHoleBlock(myImages.get(3));
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
+					setBlock(myBlocks, currBlock, root, blockWidth, blockHeight, i, j, offset);
 				} else if((i == 1 || j == 1 || i == width/blockWidth - 4) && (i!=0 && j!=0)){
 					Block currBlock = new Block(myImages.get(0));
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
+					setBlock(myBlocks, currBlock, root, blockWidth, blockHeight, i, j, offset);
 				} else if((i%2 == 0 && j%4 == 0) && (i>1 && j>1 && i < width/blockWidth - 4)) {
 					Block currBlock = new speedPlusBlock(myImages.get(1));
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
+					setBlock(myBlocks, currBlock, root, blockWidth, blockHeight, i, j, offset);
 				} else if(i%2 == 0 && j%2 == 0 && (i>1 && j>1 && i < width/blockWidth - 4)) {
 					Block currBlock = new speedMinusBlock(myImages.get(2));
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
+					setBlock(myBlocks, currBlock, root, blockWidth, blockHeight, i, j, offset);
 				} else if(i%4 == 0 && j%3!= 0 && (i>1 && j>1 && i < width/blockWidth - 4 && j < width/blockHeight - 9)) {
 					Block currBlock = new creationBlock(myImages.get(4));
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
+					setBlock(myBlocks, currBlock, root, blockWidth, blockHeight, i, j, offset);
 				}
 			}
 		}
 		paddle.setWidth(originalPaddleLength - 20);
 		paddle.setX(paddle.getX() + 5);
+	}
+	
+	public static void setBlock(ArrayList<Block> myBlocks, Block currBlock, Group root, int blockWidth, int blockHeight, int i, int j, int offset) {
+		currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
+		myBlocks.add(currBlock);
+		root.getChildren().add(currBlock.getView());
 	}
 }

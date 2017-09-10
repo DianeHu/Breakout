@@ -27,6 +27,7 @@ public class Bouncer {
 	public int keepMoving;
 	public boolean stayOnPaddle;
 	private int bouncerMaxSpeed = 500;
+	private boolean fireBall = false;
 	
 	public Bouncer (Image image, int screenWidth, int screenHeight) {
 		stayOnPaddle = true;
@@ -57,6 +58,9 @@ public class Bouncer {
 		myView.setY(myView.getY() + keepMoving * yDirection * ySpeed * elapsedTime);
 	}
 	
+	public boolean isFireBall() {
+		return fireBall;
+	}
 	public void slow(Bouncer b) {
 		b.returnXSpeed = b.xSpeed;
 		b.returnYSpeed = b.ySpeed;
@@ -71,7 +75,7 @@ public class Bouncer {
 	}
 	
 	public void accelerate(Bouncer b) {
-		if(b.xSpeed < bouncerMaxSpeed && b.ySpeed < bouncerMaxSpeed) {
+		if(b.xSpeed < bouncerMaxSpeed && b.ySpeed < bouncerMaxSpeed && b.keepMoving == 1) {
 			b.xSpeed *= 1.2;
 			b.ySpeed *= 1.2;
 		}
@@ -115,12 +119,6 @@ public class Bouncer {
 		if(myBouncer.getView().getBoundsInParent().intersects(paddle.getBoundsInParent())) {
 			yDirection *= -1;
 		}
-	}
-	
-	public void dropBouncer () {
-		this.xSpeed = 0;
-		this.ySpeed = 250;
-		this.yDirection = 1;
 	}
 	
 	public Node getView() {
