@@ -50,16 +50,16 @@
 
 5. Power-ups:
 	- Creation block that creates more balls
-	- Every ~30 points scored, ball will become "fireball" and destroy not only blocks it touches but also blocks touching it either
-	  by the side or the corner, lasts for a couple seconds
-	- Every ~40 points scored, block will appear that if hit, will instantly clear level
+*	- Every ~30 points scored, ball will increase size, lasts for a couple seconds (approximates previous idea of "fireball" destroying
+	  more blocks than it touches, without confusing user)
+	- Every ~40 points scored, block will appear that if hit, will instantly clear level, lasts for a couple seconds
 
 6. Cheat keys:
 	- Holding down s key will slow down ball by certain magnitude until released
 	- Pressing c will clear the level
 
 7. Extra:
-	- Holding down a will accelerate ball speed by time, aka longer held down = faster ball goes, until released
+*	- Holding down a will accelerate ball speed by time, aka longer held down = faster ball goes, until released
 	- I would argue this feature is substantial both because it involves a somewhat different calculation than all previous features, and also because
 	  acceleration of this sort increases a sense of urgency in most games, changing the way the game feels/plays
 	
