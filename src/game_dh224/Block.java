@@ -5,7 +5,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class Block {
-	public static final int BLOCK_WIDTH = 40;
+	public static final int BLOCK_WIDTH = 35;
 	public static final int BLOCK_HEIGHT = 20;
 	public static final int BOUNCER_SIZE = 15;
 	

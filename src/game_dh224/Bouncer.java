@@ -19,13 +19,14 @@ public class Bouncer {
 	private ImageView myView;
 	private double xSpeed;
 	private double ySpeed;
+	private double returnXSpeed;
+	private double returnYSpeed;
 	private Random dice = new Random();
 	public double xDirection;
 	public double yDirection;
-	private double previousXDir;
-	private double previousYDir;
 	public int keepMoving;
 	public boolean stayOnPaddle;
+	private int bouncerMaxSpeed = 500;
 	
 	public Bouncer (Image image, int screenWidth, int screenHeight) {
 		stayOnPaddle = true;
@@ -57,34 +58,33 @@ public class Bouncer {
 	}
 	
 	public void slow(Bouncer b) {
-		double constant = (Math.pow(100, 2) / (Math.pow(b.xSpeed, 2) + Math.pow(b.ySpeed, 2)));
-		previousXDir = b.xSpeed;
-		previousYDir = b.ySpeed;
-		b.xSpeed /= 2;
-		b.ySpeed /= 2;
-		//b.xSpeed = (b.xSpeed < 0) ? (-1 * Math.pow(constant * Math.pow(b.xSpeed, 2), 0.5)) : Math.pow(constant * Math.pow(b.xSpeed, 2), 0.5);
-		//b.ySpeed = (b.ySpeed < 0) ? (-1 * Math.pow(constant * Math.pow(b.ySpeed, 2), 0.5)) : Math.pow(constant * Math.pow(b.ySpeed, 2), 0.5);
-	}
-	
-	public void accelerate(Bouncer b) {
-		b.xSpeed *= 1.05;
-		b.ySpeed *= 1.05;
+		b.returnXSpeed = b.xSpeed;
+		b.returnYSpeed = b.ySpeed;
+		double constant = (Math.pow(BOUNCER_SPEED * .5, 2) / (Math.pow(b.xSpeed, 2) + Math.pow(b.ySpeed, 2)));;
+		b.xSpeed = Math.pow(constant * Math.pow(xSpeed, 2), 0.5);
+		b.ySpeed = Math.pow(constant * Math.pow(ySpeed, 2), 0.5);
 	}
 	
 	public void returnSpeed(Bouncer b) {
-		b.xSpeed = previousXDir;
-		b.ySpeed = previousYDir;
+		b.xSpeed = b.returnXSpeed;
+		b.ySpeed = b.returnYSpeed;
+	}
+	
+	public void accelerate(Bouncer b) {
+		if(b.xSpeed < bouncerMaxSpeed && b.ySpeed < bouncerMaxSpeed) {
+			b.xSpeed *= 1.2;
+			b.ySpeed *= 1.2;
+		}
 	}
 	
 	public void launch(double x, double y) {
+		stayOnPaddle = false;
 		yDirection = -1;
-		double xDist = x;
 		if(x < 0) 
 			xDirection = -1;
-		double yDist = y;
-		double constant = (Math.pow(BOUNCER_SPEED, 2) / (Math.pow(xDist, 2) + Math.pow(yDist, 2)));
-		xSpeed = Math.pow(constant * Math.pow(xDist, 2), 0.5);
-		ySpeed = Math.pow(constant * Math.pow(yDist, 2), 0.5);
+		double constant = (Math.pow(BOUNCER_SPEED, 2) / (Math.pow(x, 2) + Math.pow(y, 2)));
+		xSpeed = Math.pow(constant * Math.pow(x, 2), 0.5);
+		ySpeed = Math.pow(constant * Math.pow(y, 2), 0.5);
 	}
 	
 	public void bounceScreen (double screenWidth, double screenHeight) {

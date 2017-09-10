@@ -44,7 +44,7 @@ public class Game extends Application {
 	public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
 	public static final int KEY_INPUT_SPEED = 40;
 	public static final double GROWTH_RATE = 1.1;
-	public static final int BLOCK_WIDTH = 40;
+	public static final int BLOCK_WIDTH = 35;
 	public static final int BLOCK_HEIGHT = 20;
 	// public Scene initialScreen = new Scene(root, SIZE, SIZE, Color.AZURE);
 
@@ -73,6 +73,7 @@ public class Game extends Application {
 	private Image paddleImage;
 	private Image bouncerImage;
 	private Image instantClearBlockImage;
+	private ArrayList<Image> myBlockImages = new ArrayList<>();
 	private boolean needsSplash = true;
 	private boolean sHeld = false;
 	private int numNewBouncers = 0;
@@ -81,6 +82,11 @@ public class Game extends Application {
 	private Text splashWelcome;
 	private Text splashExplanation;
 	private int offset = 7;
+	private int paddleIncThreshold = 10;
+	private int thresholdCount = 0;
+	private int originalPaddleLength = 70;
+	private int paddleMaxLength = 150;
+	private Group splashScreen;
 
 	@Override
 	public void start(Stage s) {
@@ -105,8 +111,6 @@ public class Game extends Application {
 		initPointCounter();
 		initLivesCounter();
 
-		// stack = loseScreen(stack, SIZE, SIZE);
-
 		root = new Group();
 		root.getChildren().clear();
 		myScene = new Scene(root, width, height, background);
@@ -125,13 +129,13 @@ public class Game extends Application {
 
 		switch (lvlCounter) {
 		case (1):
-			level1(SIZE, BLOCK_WIDTH, BLOCK_HEIGHT);
+			Levels.level1(root, standardBlockImage, myBlocks, offset, SIZE, BLOCK_WIDTH, BLOCK_HEIGHT);
 			break;
 		case (2):
-			level2(SIZE, BLOCK_WIDTH, BLOCK_HEIGHT);
+			Levels.level2(root, myBlockImages, myBlocks, offset, SIZE, BLOCK_WIDTH, BLOCK_HEIGHT, paddle);
 			break;
 		case (3):
-			level3(SIZE, BLOCK_WIDTH, BLOCK_HEIGHT);
+			Levels.level3(root, myBlockImages, myBlocks, offset, SIZE, BLOCK_WIDTH, BLOCK_HEIGHT, paddle);
 			break;
 		}
 
@@ -140,56 +144,10 @@ public class Game extends Application {
 			root.getChildren().add(splashWelcome);
 			root.getChildren().add(splashExplanation);
 		}
-		myScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
+		myScene.setOnKeyPressed(e -> handleKeyPress(e.getCode()));
 		myScene.setOnMouseClicked(e -> handleMouseInput(e.getX(), e.getY()));
+		myScene.setOnKeyReleased(e -> handleKeyRelease(e.getCode()));
 		return myScene;
-	}
-
-	private void level1(int width, int blockWidth, int blockHeight) {
-		for (int i = 1; i < (width / blockWidth - 3); i++) {
-			for (int j = 1; j < (width / blockHeight - 15); j++) {
-				Block currBlock = new Block(standardBlockImage);
-				currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-				myBlocks.add(currBlock);
-				root.getChildren().add(currBlock.getView());
-			}
-		}
-	}
-
-	private void level2(int width, int blockWidth, int blockHeight) {
-		for (int i = 1; i < (width / blockWidth - 2); i++) {
-			for (int j = 1; j < (width / blockHeight - 10); j++) {
-				if(i%2 != 0 && j%2 != 0) {
-					Block currBlock = new Block(standardBlockImage);
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
-				} else if (i%2 == 0 && j%4 == 0) {
-					Block currBlock = new speedPlusBlock(speedPlusBlockImage);
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
-				} else if (i%2 == 0 && j%2 == 0) {
-					Block currBlock = new speedMinusBlock(speedMinusBlockImage);
-					currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-					myBlocks.add(currBlock);
-					root.getChildren().add(currBlock.getView());
-				}
-			}
-		}
-		paddle.setWidth(paddle.getWidth() - 10);
-		paddle.setX(paddle.getX() + 5);
-	}
-	
-	private void level3(int width, int blockWidth, int blockHeight) {
-		for (int i = 1; i < (width / blockWidth - 3); i += 2) {
-			for (int j = 2; j < (width / blockHeight - 15); j += 2) {
-				Block currBlock = new Block(standardBlockImage);
-				currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
-				myBlocks.add(currBlock);
-				root.getChildren().add(currBlock.getView());
-			}
-		}
 	}
 
 	public void addBouncer(Bouncer bounce) {
@@ -230,6 +188,12 @@ public class Game extends Application {
 		creationBlockImage = new Image(getClass().getClassLoader().getResourceAsStream(CREATION_BLOCK));
 		instantClearBlockImage = new Image(getClass().getClassLoader().getResourceAsStream(INSTANT_CLEAR_BLOCK));
 		paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
+		myBlockImages.add(standardBlockImage);
+		myBlockImages.add(speedPlusBlockImage);
+		myBlockImages.add(speedMinusBlockImage);
+		myBlockImages.add(blackHoleBlockImage);
+		myBlockImages.add(creationBlockImage);
+		myBlockImages.add(instantClearBlockImage);
 	}
 
 	private void initNumLabel() {
@@ -284,6 +248,11 @@ public class Game extends Application {
 					// root.getChildren().remove(block);
 					root.getChildren().remove(block.getView());
 					pointCount += block.getVal();
+					thresholdCount += block.getVal();
+					if(thresholdCount >= paddleIncThreshold && paddle.getWidth() < paddleMaxLength) {
+						thresholdCount = thresholdCount % paddleIncThreshold;
+						paddle.setWidth(paddle.getWidth() + 10);
+					}
 					pCountLabel.setText("Points: " + Integer.toString(pointCount));
 					myBlocksIterator.remove();
 				}
@@ -390,10 +359,16 @@ public class Game extends Application {
 			pointCount = 0;
 			pCountLabel.setText("Points: " + Integer.toString(pointCount));
 			s.setScene(nextScene);
+		} else if (lvlCounter > 3) {
+			Text victory = new Text(myScene.getWidth() / 3 - 100, myScene.getHeight() / 3, "Congrats, you win!");
+			Font font = new Font(25);
+			victory.setFont(font);
+			victory.setFill(Color.WHITE);
+			root.getChildren().add(victory);
 		}
 	}
 
-	private void handleKeyInput(KeyCode code) {
+	private void handleKeyPress(KeyCode code) {
 		if (paddle.getX() < 0) {
 			paddle.setX(SIZE - 75);
 		} else if (paddle.getX() > SIZE) {
@@ -403,21 +378,20 @@ public class Game extends Application {
 		} else if (code == KeyCode.LEFT) {
 			paddle.setX(paddle.getX() - KEY_INPUT_SPEED);
 		}
-
+	
 		if (code == KeyCode.C) {
-			myBouncer.keepMoving = 0;
-			if (lvlCounter < 3) {
-				nextLevel();
-			}
+			nextLevel();
 		} else if (code == KeyCode.S) {
-			sHeld = true;
-			if (sHeld) {
-				myBouncer.slow(myBouncer);
-			}
+			myBouncer.slow(myBouncer);
 		} else if (code == KeyCode.A) {
 			myBouncer.accelerate(myBouncer);
 		}
-		sHeld = false;
+	}
+	
+	private void handleKeyRelease(KeyCode code) {
+		if(code == KeyCode.S) {
+			myBouncer.returnSpeed(myBouncer);
+		}
 	}
 
 	private void handleMouseInput(double x, double y) {
@@ -425,8 +399,9 @@ public class Game extends Application {
 			if (lvlCounter == 1) {
 				root.getChildren().removeAll(backDrop, splashWelcome, splashExplanation);
 			}
-			myBouncer.stayOnPaddle = false;
-			myBouncer.launch(x - myBouncer.getX(), y - myBouncer.getY());
+			if(myBouncer.stayOnPaddle) {
+				myBouncer.launch(x - myBouncer.getX(), y - myBouncer.getY());
+			}
 		}
 	}
 
