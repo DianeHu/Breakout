@@ -13,7 +13,7 @@ public class Screen extends Game{
 	private static Font font = new Font(15);
 	
 	public static void victory(Group root, Bouncer myBouncer) {
-		Rectangle backDrop = new Rectangle(SIZE, SIZE, Color.BLACK);
+		Rectangle backDrop = new Rectangle(SIZE, SIZE, Color.CADETBLUE);
 		Text victory = new Text(SIZE / 2 - 70, SIZE / 2, "Congrats, you win!");
 		victory.setFont(font);
 		victory.setFill(Color.WHITE);
@@ -22,7 +22,7 @@ public class Screen extends Game{
 	}
 	
 	public static void defeat(Group root, Bouncer myBouncer) {
-		Rectangle backDrop = new Rectangle(SIZE, SIZE, Color.BLACK);
+		Rectangle backDrop = new Rectangle(SIZE, SIZE, Color.CADETBLUE);
 		Text defeat = new Text(SIZE / 2 - 70, SIZE / 2, "I'm sorry, you lost!");
 		defeat.setFont(font);
 		defeat.setFill(Color.WHITE);

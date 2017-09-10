@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Random;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -28,6 +29,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class Game extends Application {
+	public static final int IC_TIME_COUNT = 300;
 	public static final String TITLE = "Game";
 	public static final String BALL_IMAGE = "ball.gif";
 	public static final String MEW = "Mew.gif";
@@ -47,11 +49,17 @@ public class Game extends Application {
 	public static final int BLOCK_WIDTH = 35;
 	public static final int BLOCK_HEIGHT = 20;
 	public static final Paint BACKGROUND = Color.CADETBLUE;
-	// public Scene initialScreen = new Scene(root, SIZE, SIZE, Color.AZURE);
+	public static final int PADDLE_INC_THRESHOLD = 10;
+	public static final int INSTANT_CLEAR_THRESHOLD = 20;
+	public static final int OFFSET = 7;
+	public static final int PADDLE_MAX_LENGTH = 120;
+	public static final int BOUNCER_SIZEUP_THRESHOLD = 15;
+	public static final int BOUNCER_MAX_SIZE = 25;
+	public static final int BOUNCER_ORIGINAL_SIZE = 15;
 
-	private Label pCountLabel = new Label();
-	private Label lvlNumLabel = new Label();
-	private Label livesCounter = new Label();
+	private LabelMaker pCountLabel;
+	private LabelMaker lvlNumLabel;
+	private LabelMaker livesCounter;
 	private Group root = new Group();
 	private Group splashRoot;
 	private Scene myScene;
@@ -70,6 +78,8 @@ public class Game extends Application {
 	private ArrayList<Bouncer> bouncersToBeDeleted = new ArrayList<>();
 	private ArrayList<Block> blocksToBeAdded = new ArrayList<>();
 	private ArrayList<Block> blocksToBeDeleted = new ArrayList<>();
+	private ArrayList<Double> possibleICBlockX = new ArrayList<>();
+	private ArrayList<Double> possibleICBlockY = new ArrayList<>();
 	private Stage s = null;
 	private Image standardBlockImage; 
 	private Image speedPlusBlockImage;
@@ -86,13 +96,11 @@ public class Game extends Application {
 	private int pointCount = 0;
 	private int lvlCounter = 1;
 	private int numLives = 3;
-	private int offset = 7;
 	private int timer = 0;
-	private int paddleIncThreshold = 10;
 	private int paddleThresholdCount = 0;
-	private int instantClearThreshold = 5;
 	private int icThresholdCount = 0;
-	private int paddleMaxLength = 150;
+	private int bouncerSizeUpCount = 0;
+	private Random generator = new Random();
 
 	@Override
 	public void start(Stage s) {
@@ -125,11 +133,12 @@ public class Game extends Application {
 	}
 
 	protected Scene setUpGame(int width, int height, Paint background) {
-		initNumLabel();
+		lvlNumLabel = new LabelMaker(SIZE - 60, SIZE - 60, "Level: " + Integer.toString(lvlCounter), Color.WHITE);
+		pCountLabel = new LabelMaker(SIZE - 60, SIZE - 40, "Point: " + Integer.toString(pointCount), Color.WHITE);
+		livesCounter = new LabelMaker(SIZE - 60, SIZE - 80, "Lives: " + Integer.toString(numLives), Color.WHITE);
+		
 		initImages();
 		initBlockImages();
-		initPointCounter();
-		initLivesCounter();
 
 		root = new Group();
 		root.getChildren().clear();
@@ -140,21 +149,23 @@ public class Game extends Application {
 		myBouncers.add(myBouncer);
 		root.getChildren().add(paddle);
 		root.getChildren().add(myBouncer.getView());
-		root.getChildren().add(pCountLabel);
-		root.getChildren().add(lvlNumLabel);
-		root.getChildren().add(livesCounter);
+		root.getChildren().add(pCountLabel.getLabel());
+		root.getChildren().add(lvlNumLabel.getLabel());
+		root.getChildren().add(livesCounter.getLabel());
 
 		switch (lvlCounter) {
 		case (1):
-			Levels.level1(root, standardBlockImage, myBlocks, offset, SIZE, BLOCK_WIDTH, BLOCK_HEIGHT);
+			Levels.level1(root, standardBlockImage, myBlocks, OFFSET, SIZE, BLOCK_WIDTH, BLOCK_HEIGHT);
 			break;
 		case (2):
-			Levels.level2(root, myBlockImages, myBlocks, offset, SIZE, BLOCK_WIDTH, BLOCK_HEIGHT, paddle);
+			Levels.level2(root, myBlockImages, myBlocks, OFFSET, SIZE, BLOCK_WIDTH, BLOCK_HEIGHT, paddle);
 			break;
 		case (3):
-			Levels.level3(root, myBlockImages, myBlocks, offset, SIZE, BLOCK_WIDTH, BLOCK_HEIGHT, paddle);
+			Levels.level3(root, myBlockImages, myBlocks, OFFSET, SIZE, BLOCK_WIDTH, BLOCK_HEIGHT, paddle);
 			break;
 		}
+		
+		initICBlockPos();
 
 		myScene.setOnKeyPressed(e -> handleKeyPress(e.getCode()));
 		myScene.setOnMouseClicked(e -> handleMouseInput(e.getX(), e.getY()));
@@ -181,6 +192,16 @@ public class Game extends Application {
 		splashScene.setOnKeyPressed(e -> handleSplashKeyPress(e.getCode()));
 		return splashScene;
 	}
+	
+	private void initICBlockPos() {
+		for(int i = 0; i < myBlocks.size(); i++) {
+			possibleICBlockX.add(myBlocks.get(i).getX());
+		}
+		
+		for(int i = 0; i < myBlocks.size(); i++) {
+			possibleICBlockY.add(myBlocks.get(i).getY());
+		}
+	}
 
 	private void initImages() {
 		bouncerImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
@@ -203,27 +224,6 @@ public class Game extends Application {
 		myBlockImages.add(instantClearBlockImage);
 	}
 
-	private void initNumLabel() {
-		lvlNumLabel.setLayoutX(SIZE - 60);
-		lvlNumLabel.setLayoutY(SIZE - 60);
-		lvlNumLabel.setText("Level: " + Integer.toString(lvlCounter));
-		lvlNumLabel.setTextFill(Color.WHITE);
-	}
-
-	private void initPointCounter() {
-		pCountLabel.setLayoutX(SIZE - 60);
-		pCountLabel.setLayoutY(SIZE - 40);
-		pCountLabel.setText("Point: " + Integer.toString(pointCount));
-		pCountLabel.setTextFill(Color.WHITE);
-	}
-
-	private void initLivesCounter() {
-		livesCounter.setLayoutX(SIZE - 60);
-		livesCounter.setLayoutY(SIZE - 80);
-		livesCounter.setText("Lives: " + Integer.toString(numLives));
-		livesCounter.setTextFill(Color.WHITE);
-	}
-
 	private void step(double elapsedTime) {
 		timer++;
 		myBouncer.moveWithPaddle(myBouncer, paddle);
@@ -239,54 +239,21 @@ public class Game extends Application {
 		while (myBlocksIterator.hasNext()) {
 			Block block = myBlocksIterator.next();
 			for(Bouncer b : myBouncers) {
-				if(block instanceof instantClearBlock && timer >= 1000) {
+				if(block instanceof instantClearBlock && timer >= IC_TIME_COUNT) {
 					blocksToBeDeleted.add(block);
 					timer = 0;
 				}
 				if (b.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-					if (block instanceof blackHoleBlock && b == myBouncer) {
-						restartBouncer(myBouncer);
-						blackHoleBlocks.remove(block);
-					} else if(block instanceof blackHoleBlock && b != myBouncer) {
-						blackHoleBlocks.remove(block);
-						root.getChildren().remove(b.getView());
-						bouncersToBeDeleted.add(b);
-					}
-					else if (block instanceof creationBlock) {
-						Bouncer newBounce = myBouncer.creationBouncer(block.getX(), block.getY());
-						bouncersToBeAdded.add(newBounce);
-					}
-					if (block instanceof instantClearBlock) {
-						instantClear = true;
-					}
+					abnormalBlockCheck(block, b);
 					block.bounceBlock(b);
-					myBouncer.setImage(mewImage);
-					// root.getChildren().remove(block);
 					root.getChildren().remove(block.getView());
-					pointCount += block.getVal();
-					paddleThresholdCount += block.getVal();
-					icThresholdCount += block.getVal();
-					if(paddleThresholdCount >= paddleIncThreshold && paddle.getWidth() < paddleMaxLength) {
-						paddleThresholdCount = paddleThresholdCount % paddleIncThreshold;
-						paddle.setWidth(paddle.getWidth() + 10);
-					}
-					if(icThresholdCount >= instantClearThreshold) {
-						icThresholdCount = instantClearThreshold % icThresholdCount;
-						Block icBlock = new instantClearBlock(instantClearBlockImage);
-						icBlock.setLoc(0, 0);
-						blocksToBeAdded.add(icBlock);
-					}
+					updatePointCounts(block);
+					checkPowerUps();
 					pCountLabel.setText("Points: " + Integer.toString(pointCount));
 					myBlocksIterator.remove();
 				}
 			}
-			for(Bouncer b : bouncersToBeAdded) {
-				root.getChildren().add(b.getView());
-			}
-			myBouncers.addAll(bouncersToBeAdded);
-			myBouncers.removeAll(bouncersToBeDeleted);
-			bouncersToBeDeleted.clear();
-			bouncersToBeAdded.clear();
+			updateMyBouncers();
 		}
 		if(instantClear) {
 			myBouncers.clear();
@@ -299,7 +266,10 @@ public class Game extends Application {
 			b.bouncePaddle(b, paddle);
 			b.bounceScreen(SIZE, SIZE);
 		}
-		
+		updateMyBlocks();
+	}
+
+	private void updateMyBlocks() {
 		for(Block block : blocksToBeAdded) {
 			root.getChildren().add(block.getView());
 		}
@@ -307,9 +277,62 @@ public class Game extends Application {
 			root.getChildren().remove(block.getView());
 		}
 		myBlocks.addAll(blocksToBeAdded);
-		blocksToBeAdded.clear();
 		myBlocks.removeAll(blocksToBeDeleted);
-		blocksToBeDeleted.clear();
+		clearBlockMods();
+	}
+
+	private void updateMyBouncers() {
+		for(Bouncer b : bouncersToBeAdded) {
+			root.getChildren().add(b.getView());
+		}
+		myBouncers.addAll(bouncersToBeAdded);
+		myBouncers.removeAll(bouncersToBeDeleted);
+		clearBouncerMods();
+	}
+
+	private void checkPowerUps() {
+		if(paddleThresholdCount >= PADDLE_INC_THRESHOLD && paddle.getWidth() < PADDLE_MAX_LENGTH) {
+			paddleThresholdCount = paddleThresholdCount % PADDLE_INC_THRESHOLD;
+			paddle.setWidth(paddle.getWidth() + 10);
+		}
+		if(icThresholdCount >= INSTANT_CLEAR_THRESHOLD) {
+			icThresholdCount = INSTANT_CLEAR_THRESHOLD % icThresholdCount;
+			Block icBlock = new instantClearBlock(instantClearBlockImage);
+			int rand = generator.nextInt(possibleICBlockX.size());
+			icBlock.setLoc(possibleICBlockX.get(rand), possibleICBlockY.get(rand));
+			//icBlock.setLoc(blockReference.getX(), blockReference.getY());
+			blocksToBeAdded.add(icBlock);
+			timer = 0;
+		}
+		if(bouncerSizeUpCount >= BOUNCER_SIZEUP_THRESHOLD && myBouncer.getSize() < BOUNCER_MAX_SIZE) {
+			bouncerSizeUpCount = BOUNCER_SIZEUP_THRESHOLD % bouncerSizeUpCount;
+			myBouncer.incSize();
+		}
+	}
+
+	private void updatePointCounts(Block block) {
+		pointCount += block.getVal();
+		paddleThresholdCount += block.getVal();
+		bouncerSizeUpCount += block.getVal();
+		icThresholdCount += block.getVal();
+	}
+
+	private void abnormalBlockCheck(Block block, Bouncer b) {
+		if (block instanceof blackHoleBlock && b == myBouncer) {
+			restartBouncer(myBouncer);
+			blackHoleBlocks.remove(block);
+		} else if(block instanceof blackHoleBlock && b != myBouncer) {
+			blackHoleBlocks.remove(block);
+			root.getChildren().remove(b.getView());
+			bouncersToBeDeleted.add(b);
+		}
+		else if (block instanceof creationBlock) {
+			Bouncer newBounce = myBouncer.creationBouncer(block.getX(), block.getY());
+			bouncersToBeAdded.add(newBounce);
+		}
+		if (block instanceof instantClearBlock) {
+			instantClear = true;
+		}
 	}
 
 	private void winLose() {
@@ -337,6 +360,7 @@ public class Game extends Application {
 		if(numLives > 1) {
 			numLives--;
 			myBouncer.stayOnPaddle = true;
+			myBouncer.setSize(BOUNCER_ORIGINAL_SIZE);
 			myBouncer.yDirection = -1;
 			myBouncer.xDirection = 1;
 			paddle.setX(SIZE / 2 - 40);
@@ -352,11 +376,9 @@ public class Game extends Application {
 		myBouncer.keepMoving = 0;
 		root.getChildren().clear();
 		myBouncers.clear();
-		bouncersToBeAdded.clear();
-		bouncersToBeDeleted.clear();
+		clearBouncerMods();
 		myBlocks.clear();
-		blocksToBeAdded.clear();
-		blocksToBeDeleted.clear();
+		clearBlockMods();
 		blackHoleBlocks.clear();
 		numLives = 3;
 		lvlCounter++;
@@ -372,6 +394,16 @@ public class Game extends Application {
 		} else if (lvlCounter > 3) {
 			Screen.victory(root, myBouncer);
 		}
+	}
+
+	private void clearBlockMods() {
+		blocksToBeAdded.clear();
+		blocksToBeDeleted.clear();
+	}
+
+	private void clearBouncerMods() {
+		bouncersToBeAdded.clear();
+		bouncersToBeDeleted.clear();
 	}
 
 	private void handleKeyPress(KeyCode code) {

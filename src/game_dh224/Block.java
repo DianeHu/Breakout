@@ -7,7 +7,6 @@ import javafx.scene.image.ImageView;
 public class Block {
 	public static final int BLOCK_WIDTH = 35;
 	public static final int BLOCK_HEIGHT = 20;
-	public static final int BOUNCER_SIZE = 15;
 	
 	private ImageView myView;
 	
@@ -39,10 +38,10 @@ public class Block {
 	}
 	
 	public void bounceBlock (Bouncer myBouncer) {
-		if((myBouncer.getX() + BOUNCER_SIZE / 2) >= myView.getX() && myBouncer.getX() <= (myView.getX() + BLOCK_WIDTH) && 
+		if((myBouncer.getX() + myBouncer.getSize()/2) > myView.getX() && myBouncer.getX() < (myView.getX() + BLOCK_WIDTH) && 
 				myBouncer.getView().getBoundsInParent().intersects(myView.getBoundsInParent())) {
 			myBouncer.yDirection *= -1;
-		} else if ((myBouncer.getY() + BOUNCER_SIZE / 2) >= myView.getY() && myBouncer.getY() <= (myView.getY() + BLOCK_HEIGHT) && 
+		} else if ((myBouncer.getY() + myBouncer.getSize()/2) > myView.getY() && myBouncer.getY() < (myView.getY() + BLOCK_HEIGHT) && 
 				myBouncer.getView().getBoundsInParent().intersects(myView.getBoundsInParent())) {
 			myBouncer.xDirection *= -1;
 		}

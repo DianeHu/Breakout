@@ -10,13 +10,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 
 public class Bouncer {
-	public static final int BOUNCER_SIZE = 15;
 	public static final int BOUNCER_MIN_SPEED = -200;
 	public static final int BOUNCER_MAX_SPEED = 200;
 	public static final double BOUNCER_SPEED = 300;
 	public static final int SCREEN_SIZE = 400;
 	
 	private ImageView myView;
+	private int bouncerSize = 15;
 	private double xSpeed;
 	private double ySpeed;
 	private double returnXSpeed;
@@ -33,9 +33,9 @@ public class Bouncer {
 		stayOnPaddle = true;
 		keepMoving = 1;
 		myView = new ImageView(image);
-		myView.setFitWidth(BOUNCER_SIZE);
-		myView.setFitHeight(BOUNCER_SIZE);
-		myView.setX(screenWidth / 2 - 37);
+		myView.setFitWidth(bouncerSize);
+		myView.setFitHeight(bouncerSize);
+		myView.setX(screenWidth / 2 - 38);
 		myView.setY(screenHeight - 37);
 		xSpeed = 0;
 		ySpeed = 0;
@@ -85,6 +85,18 @@ public class Bouncer {
 		}
 	}
 	
+	public void incSize() {
+		bouncerSize *= 1.2;
+		myView.setFitWidth(bouncerSize);
+		myView.setFitHeight(bouncerSize);
+	}
+	
+	public void setSize(int size) {
+		bouncerSize = size;
+		myView.setFitWidth(bouncerSize);
+		myView.setFitHeight(bouncerSize);
+	}
+	
 	public void launch(double x, double y) {
 		stayOnPaddle = false;
 		yDirection = -1;
@@ -96,10 +108,10 @@ public class Bouncer {
 	}
 	
 	public void bounceScreen (double screenWidth, double screenHeight) {
-		if(myView.getX() < 0 || myView.getX() > screenWidth) {
+		if(myView.getX() < 0 || myView.getX() + bouncerSize > screenWidth) {
 			xDirection *= -1;
 		}
-		if(myView.getY() < 0) {
+		if(myView.getY() + bouncerSize < 0) {
 			yDirection *= -1;
 		}
 	}
@@ -135,6 +147,10 @@ public class Bouncer {
 	
 	public double getY() {
 		return myView.getY();
+	}
+	
+	public double getSize() {
+		return this.bouncerSize;
 	}
 	
 	private int getRandomInRange(int min, int max) {
