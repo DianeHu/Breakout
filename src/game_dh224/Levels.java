@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 
 public class Levels extends Game{
 	
-	private static int originalPaddleLength = 70;
+	private static final int originalPaddleLength = 70;
 	
 	public static void level1(Group root, Image image, ArrayList<Block> myBlocks, int offset, int width, int blockWidth, int blockHeight) {
 		for (int i = 1; i < (width / blockWidth - 2); i++) {
@@ -69,7 +69,7 @@ public class Levels extends Game{
 		paddle.setX(paddle.getX() + 5);
 	}
 	
-	public static void setBlock(ArrayList<Block> myBlocks, Block currBlock, Group root, int blockWidth, int blockHeight, int i, int j, int offset) {
+	private static void setBlock(ArrayList<Block> myBlocks, Block currBlock, Group root, int blockWidth, int blockHeight, int i, int j, int offset) {
 		currBlock.setLoc(blockWidth * i + offset * i, blockHeight * j + offset * j);
 		myBlocks.add(currBlock);
 		root.getChildren().add(currBlock.getView());

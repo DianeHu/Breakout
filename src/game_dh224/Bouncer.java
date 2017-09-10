@@ -58,6 +58,10 @@ public class Bouncer {
 		myView.setY(myView.getY() + keepMoving * yDirection * ySpeed * elapsedTime);
 	}
 	
+	public void setImage(Image image) {
+		myView.setImage(image);
+	}
+	
 	public boolean isFireBall() {
 		return fireBall;
 	}

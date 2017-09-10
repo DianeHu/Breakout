@@ -47,21 +47,6 @@ public class Block {
 			myBouncer.xDirection *= -1;
 		}
 	}
-	
-	public class creationBlock extends Block{
-		
-		public creationBlock(Image image, int screenWidth, int screenHeight) {
-			super(image);
-		}
-	}
-	
-	public class instantClearBlock extends Block{
-		
-		public instantClearBlock(Image image, int screenWidth, int screenHeight) {
-			super(image);
-		}
-	}
-
 }
 
 

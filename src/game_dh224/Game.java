@@ -30,6 +30,7 @@ import javafx.util.Duration;
 public class Game extends Application {
 	public static final String TITLE = "Game";
 	public static final String BALL_IMAGE = "ball.gif";
+	public static final String MEW = "Mew.gif";
 	public static final String STANDARD_BLOCK = "Brick1.gif";
 	public static final String SPEED_PLUS_BLOCK = "Brick2.gif";
 	public static final String SPEED_MINUS_BLOCK = "Brick3.gif";
@@ -45,7 +46,7 @@ public class Game extends Application {
 	public static final double GROWTH_RATE = 1.1;
 	public static final int BLOCK_WIDTH = 35;
 	public static final int BLOCK_HEIGHT = 20;
-	public static final Paint BACKGROUND = Color.DARKSLATEGREY;
+	public static final Paint BACKGROUND = Color.CADETBLUE;
 	// public Scene initialScreen = new Scene(root, SIZE, SIZE, Color.AZURE);
 
 	private Label pCountLabel = new Label();
@@ -56,15 +57,19 @@ public class Game extends Application {
 	private Scene myScene;
 	private Scene splashScene;
 	private Rectangle paddle;
-	private Rectangle backDrop = new Rectangle(SIZE, SIZE, Color.BLACK);
+	private Rectangle backDrop = new Rectangle(SIZE, SIZE, Color.CADETBLUE);
 	private boolean isLevelDisplay = false;
+	private boolean instantClear = false;
 	private Text levelUp;
 	private Bouncer myBouncer;
 	private ArrayList<Bouncer> myBouncers = new ArrayList<>();
 	private ArrayList<Block> myBlocks = new ArrayList<>();
 	private ArrayList<Block> blackHoleBlocks = new ArrayList<>();
-	private ArrayList<Bouncer> toBeAdded = new ArrayList<>();
+	private ArrayList<Bouncer> bouncersToBeAdded = new ArrayList<>();
 	private ArrayList<Image> myBlockImages = new ArrayList<>();
+	private ArrayList<Bouncer> bouncersToBeDeleted = new ArrayList<>();
+	private ArrayList<Block> blocksToBeAdded = new ArrayList<>();
+	private ArrayList<Block> blocksToBeDeleted = new ArrayList<>();
 	private Stage s = null;
 	private Image standardBlockImage; 
 	private Image speedPlusBlockImage;
@@ -74,16 +79,19 @@ public class Game extends Application {
 	private Image paddleImage;
 	private Image bouncerImage;
 	private Image instantClearBlockImage;
+	private Image mewImage;
 	private Text splashWelcome;
 	private Text splashExplanation;
 	private ListIterator<Block> myBlocksIterator = null;
-	private ListIterator<Bouncer> myBouncersIterator = null;
 	private int pointCount = 0;
 	private int lvlCounter = 1;
 	private int numLives = 3;
 	private int offset = 7;
+	private int timer = 0;
 	private int paddleIncThreshold = 10;
-	private int thresholdCount = 0;
+	private int paddleThresholdCount = 0;
+	private int instantClearThreshold = 5;
+	private int icThresholdCount = 0;
 	private int paddleMaxLength = 150;
 
 	@Override
@@ -173,10 +181,6 @@ public class Game extends Application {
 		splashScene.setOnKeyPressed(e -> handleSplashKeyPress(e.getCode()));
 		return splashScene;
 	}
-	
-	public void addBouncer(Bouncer bounce) {
-		root.getChildren().add(bounce.getView());
-	}
 
 	private void initImages() {
 		bouncerImage = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
@@ -187,6 +191,7 @@ public class Game extends Application {
 		creationBlockImage = new Image(getClass().getClassLoader().getResourceAsStream(CREATION_BLOCK));
 		instantClearBlockImage = new Image(getClass().getClassLoader().getResourceAsStream(INSTANT_CLEAR_BLOCK));
 		paddleImage = new Image(getClass().getClassLoader().getResourceAsStream(PADDLE_IMAGE));
+		mewImage = new Image(getClass().getClassLoader().getResourceAsStream(MEW));
 	}
 	
 	private void initBlockImages() {
@@ -220,9 +225,9 @@ public class Game extends Application {
 	}
 
 	private void step(double elapsedTime) {
+		timer++;
 		myBouncer.moveWithPaddle(myBouncer, paddle);
 		myBlocksIterator = myBlocks.listIterator();
-		myBouncersIterator = myBouncers.listIterator();
 		bounce();
 		for (Bouncer b : myBouncers) {
 			b.move(elapsedTime);
@@ -234,75 +239,77 @@ public class Game extends Application {
 		while (myBlocksIterator.hasNext()) {
 			Block block = myBlocksIterator.next();
 			for(Bouncer b : myBouncers) {
+				if(block instanceof instantClearBlock && timer >= 1000) {
+					blocksToBeDeleted.add(block);
+					timer = 0;
+				}
 				if (b.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-					if (block instanceof blackHoleBlock) {
+					if (block instanceof blackHoleBlock && b == myBouncer) {
 						restartBouncer(myBouncer);
 						blackHoleBlocks.remove(block);
-					} else if (block instanceof creationBlock) {
+					} else if(block instanceof blackHoleBlock && b != myBouncer) {
+						blackHoleBlocks.remove(block);
+						root.getChildren().remove(b.getView());
+						bouncersToBeDeleted.add(b);
+					}
+					else if (block instanceof creationBlock) {
 						Bouncer newBounce = myBouncer.creationBouncer(block.getX(), block.getY());
-						toBeAdded.add(newBounce);
+						bouncersToBeAdded.add(newBounce);
 					}
 					if (block instanceof instantClearBlock) {
-						myBlocksIterator.remove();
-						nextLevel();
+						instantClear = true;
 					}
-					block.bounceBlock(myBouncer);
+					block.bounceBlock(b);
+					myBouncer.setImage(mewImage);
 					// root.getChildren().remove(block);
 					root.getChildren().remove(block.getView());
 					pointCount += block.getVal();
-					thresholdCount += block.getVal();
-					if(thresholdCount >= paddleIncThreshold && paddle.getWidth() < paddleMaxLength) {
-						thresholdCount = thresholdCount % paddleIncThreshold;
+					paddleThresholdCount += block.getVal();
+					icThresholdCount += block.getVal();
+					if(paddleThresholdCount >= paddleIncThreshold && paddle.getWidth() < paddleMaxLength) {
+						paddleThresholdCount = paddleThresholdCount % paddleIncThreshold;
 						paddle.setWidth(paddle.getWidth() + 10);
+					}
+					if(icThresholdCount >= instantClearThreshold) {
+						icThresholdCount = instantClearThreshold % icThresholdCount;
+						Block icBlock = new instantClearBlock(instantClearBlockImage);
+						icBlock.setLoc(0, 0);
+						blocksToBeAdded.add(icBlock);
 					}
 					pCountLabel.setText("Points: " + Integer.toString(pointCount));
 					myBlocksIterator.remove();
 				}
 			}
-			for(Bouncer b : toBeAdded) {
-				addBouncer(b);
+			for(Bouncer b : bouncersToBeAdded) {
+				root.getChildren().add(b.getView());
 			}
-			myBouncers.addAll(toBeAdded);
+			myBouncers.addAll(bouncersToBeAdded);
+			myBouncers.removeAll(bouncersToBeDeleted);
+			bouncersToBeDeleted.clear();
+			bouncersToBeAdded.clear();
+		}
+		if(instantClear) {
+			myBouncers.clear();
+			myBlocks.clear();
+			nextLevel();
+			instantClear = false;
 		}
 
 		for (Bouncer b : myBouncers) {
 			b.bouncePaddle(b, paddle);
 			b.bounceScreen(SIZE, SIZE);
 		}
-
-		/*while (myBlocksIterator.hasNext()) {
-			Block block = myBlocksIterator.next();
-			collide(myBouncer, block);
+		
+		for(Block block : blocksToBeAdded) {
+			root.getChildren().add(block.getView());
 		}
-
-		for (Bouncer b : myBouncers) {
-			b.bouncePaddle(b, paddle);
-			b.bounceScreen(SIZE, SIZE);
-		}*/
-	}
-
-	private void collide(Bouncer b, Block block) {
-		if (b.getView().getBoundsInParent().intersects(block.getView().getBoundsInParent())) {
-			if (block instanceof blackHoleBlock) {
-				restartBouncer(myBouncer);
-				blackHoleBlocks.remove(block);
-			} else if (block instanceof creationBlock) {
-				Bouncer newBounce = myBouncer.creationBouncer(block.getX(), block.getY());
-				toBeAdded.add(newBounce);
-				addBouncer(newBounce);
-			}
-			if (block instanceof instantClearBlock) {
-				myBlocksIterator.remove();
-				nextLevel();
-			}
-			block.bounceBlock(myBouncer);
-			// root.getChildren().remove(block);
+		for(Block block : blocksToBeDeleted) {
 			root.getChildren().remove(block.getView());
-			pointCount += block.getVal();
-			pCountLabel.setText("Points: " + Integer.toString(pointCount));
-			myBlocksIterator.remove();
 		}
-		myBouncers.addAll(toBeAdded);
+		myBlocks.addAll(blocksToBeAdded);
+		blocksToBeAdded.clear();
+		myBlocks.removeAll(blocksToBeDeleted);
+		blocksToBeDeleted.clear();
 	}
 
 	private void winLose() {
@@ -317,7 +324,6 @@ public class Game extends Application {
 				nextLevel();
 			}
 		}
-
 		if (myBouncer.getY() > myScene.getHeight()) {
 			if (needToWin.size() != 0 && numLives > 1) {
 				restartBouncer(myBouncer);
@@ -328,19 +334,29 @@ public class Game extends Application {
 	}
 
 	private void restartBouncer(Bouncer myBouncer) {
-		numLives--;
-		myBouncer.stayOnPaddle = true;
-		myBouncer.yDirection = -1;
-		myBouncer.xDirection = 1;
-		paddle.setX(SIZE / 2 - 40);
-		paddle.setY(SIZE - 20);
-		myBouncer.moveWithPaddle(myBouncer, paddle);
-		livesCounter.setText("Lives: " + Integer.toString(numLives));
+		if(numLives > 1) {
+			numLives--;
+			myBouncer.stayOnPaddle = true;
+			myBouncer.yDirection = -1;
+			myBouncer.xDirection = 1;
+			paddle.setX(SIZE / 2 - 40);
+			paddle.setY(SIZE - 20);
+			myBouncer.moveWithPaddle(myBouncer, paddle);
+			livesCounter.setText("Lives: " + Integer.toString(numLives));
+		} else if (numLives == 1) {
+			Screen.defeat(root, myBouncer);
+		}
 	}
 
 	private void nextLevel() {
 		myBouncer.keepMoving = 0;
+		root.getChildren().clear();
+		myBouncers.clear();
+		bouncersToBeAdded.clear();
+		bouncersToBeDeleted.clear();
 		myBlocks.clear();
+		blocksToBeAdded.clear();
+		blocksToBeDeleted.clear();
 		blackHoleBlocks.clear();
 		numLives = 3;
 		lvlCounter++;
