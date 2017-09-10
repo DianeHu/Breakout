@@ -33,12 +33,12 @@ public class Bouncer {
 		myView = new ImageView(image);
 		myView.setFitWidth(BOUNCER_SIZE);
 		myView.setFitHeight(BOUNCER_SIZE);
-		myView.setX(screenWidth / 2 - 40);
+		myView.setX(screenWidth / 2 - 37);
 		myView.setY(screenHeight - 37);
 		xSpeed = 0;
 		ySpeed = 0;
 		xDirection = 1;
-		yDirection = 1;
+		yDirection = -1;
 	}
 	
 	public Bouncer creationBouncer(double blockX, double blockY) {
@@ -77,14 +77,16 @@ public class Bouncer {
 	}
 	
 	public void launch(double x, double y) {
-		double xDist = x - myView.getX();
-		double yDist = y - myView.getY();
+		yDirection = -1;
+		double xDist = x;
+		if(x < 0) 
+			xDirection = -1;
+		double yDist = y;
 		double constant = (Math.pow(BOUNCER_SPEED, 2) / (Math.pow(xDist, 2) + Math.pow(yDist, 2)));
 		xSpeed = Math.pow(constant * Math.pow(xDist, 2), 0.5);
 		ySpeed = Math.pow(constant * Math.pow(yDist, 2), 0.5);
-		if(xDist < SCREEN_SIZE / 2) {
-			xSpeed *= -1;
-		}
+		
+		System.out.println("My xDirection is" + xDirection + "My yDirection is" + yDirection);
 	}
 	
 	public void bounceScreen (double screenWidth, double screenHeight) {
@@ -98,8 +100,8 @@ public class Bouncer {
 	
 	public void moveWithPaddle(Bouncer myBouncer, Rectangle paddle) {
 		if(stayOnPaddle) {
-			myBouncer.setX(paddle.getX() + 25);
-			myBouncer.setY(paddle.getY() - 20);
+			myBouncer.setX(paddle.getX() + paddle.getWidth()/2 - 10);
+			myBouncer.setY(SCREEN_SIZE - 36);
 		}
 	}
 	
