@@ -50,7 +50,7 @@
 
 5. Power-ups:
 	- Creation block that creates more balls
-*	- Every ~30 points scored, ball will increase size until maxes out (approximates previous idea of "fireball" destroying
+	- Every ~30 points scored, ball will increase size until maxes out (approximates previous idea of "fireball" destroying
 	  more blocks than it touches, without confusing user)
 	- Every ~40 points scored, block will appear that if hit, will instantly clear level, lasts for a couple seconds
 
