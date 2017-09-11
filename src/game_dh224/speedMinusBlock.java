@@ -1,5 +1,9 @@
 package game_dh224;
 
+/* Written by Diane Hu. speedMinusBlock is an extension class of Block that overrides
+ * certain methods in Block to create a new type of block that behaves differently from the standard
+ * block. Dependent on the Block class, and JavaFX libraries.*/
+
 import javafx.scene.image.Image;
 
 public class speedMinusBlock extends Block{
@@ -8,15 +12,14 @@ public class speedMinusBlock extends Block{
 		super(image);
 	}
 	
+	/* bounceBlock overrides the superclass bounceBlock to not only bounce the bouncer
+	 * when it hits the block, but also to slow it by a magnitude of .7*/
 	@Override
 	public void bounceBlock (Bouncer myBouncer) {
-		if((myBouncer.getX() + myBouncer.getSize()/2) > this.getX() && myBouncer.getX() < (this.getX() + BLOCK_WIDTH) && 
-				myBouncer.getView().getBoundsInParent().intersects(this.getView().getBoundsInParent())) {
-			myBouncer.yDirection *= -.5;
-		} else if ((myBouncer.getY() + myBouncer.getSize()/2) > this.getY() && myBouncer.getY() < (this.getY() + BLOCK_HEIGHT) && 
-				myBouncer.getView().getBoundsInParent().intersects(this.getView().getBoundsInParent())) {
-			myBouncer.xDirection *= -.5;
+		if(isCollidingTopBottom(myBouncer)) {
+			myBouncer.toggleYDir(-.7);
+		} else if (isCollidingOnSides(myBouncer)) {
+			myBouncer.toggleXDir(-.7);
 		}
 	}
 }
-
