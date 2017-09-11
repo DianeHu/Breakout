@@ -493,10 +493,10 @@ public class Game extends Application {
 		}
 		for(Bouncer b : myBouncers) {
 			//if not the original bouncer, simply collect bouncer to be deleted if they fall
-			if(b != myBouncer && (b.getY() + b.getSize())> myScene.getHeight()) {
+			if(b != myBouncer && (b.getY() + b.getSize()) > myScene.getHeight() - ORIGINAL_PADDLE_HEIGHT) {
 				bouncersToBeDeleted.add(b);
 			}
-			if ((myBouncer.getY() + myBouncer.getSize()) > myScene.getHeight()) {
+			if ((myBouncer.getY() + myBouncer.getSize()) > myScene.getHeight() - ORIGINAL_PADDLE_HEIGHT) {
 				if (needToWin.size() != 0 && numLives > 1) {
 					restartBouncer(myBouncer);
 				} else if (numLives <= 1) {
