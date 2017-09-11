@@ -14,6 +14,10 @@ Sunday, September 3rd
 
 Sunday, September 10th
 
+* Number of hours spent
+
+Around 40-50
+
 * Role in developing the project
 
 This was a solo project and I therefore completed the project on my own.
