@@ -48,6 +48,8 @@ Paddle: warps from one side of screen to other, and launches ball at start of ev
 
 Note: originally, in plan ball was meant to change color when bounced off different blocks. Ran out of time to implement, but could do so if time allowed, by setting the ball image every time it bounced against a block, using the override bounceBlock methods in each block subclass. Did not prioritize since it adds little functionality.
 
+Additionally, level one does not have different block types as I stated in my plan. It only has the standard block, laid out in a row configuration. I thought this might be easier for a user just to get the hang of the game, and included all the different blocks in subsequent levels.
+
 Otherwise, game conforms to plan.
 
 * Known bugs
